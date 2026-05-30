@@ -1,0 +1,29 @@
+# dependências
+/node_modules
+/.pnp
+.pnp.*
+
+# next
+/.next/
+/out/
+next-env.d.ts
+
+# produção
+/build
+
+# ambiente
+.env
+.env*.local
+
+# logs / sistema
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+*.pem
+
+# prisma
+/prisma/*.db
+
+# referência de design (não faz parte do build)
+/_design_reference

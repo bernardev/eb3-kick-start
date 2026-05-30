@@ -1,0 +1,146 @@
+// ============================================================
+//  KICK START — Portal EB-3 · schema do banco (Postgres / Neon)
+//  Guarda usuários, vagas EB-3, perguntas, aplicações (com prova
+//  de consentimento) e o processo/caso de cada cliente.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Papel do usuário no portal.
+enum Role {
+  CLIENT // candidato (vê vagas e o próprio processo)
+  ADMIN  // equipe Kick Start (gerencia casos e vagas)
+}
+
+// Status com semântica fixa de cores (NÃO alterar os nomes):
+//  ANALYSIS 🟡  PENDING 🟠  DENIED 🔴  APPROVED 🟢  NONE ⚪
+enum CaseStatus {
+  NONE
+  ANALYSIS
+  PENDING
+  DENIED
+  APPROVED
+}
+
+// Tipo de campo de uma pergunta do questionário da vaga.
+enum QuestionType {
+  TEXT     // resposta curta (uma linha)
+  TEXTAREA // resposta longa (parágrafo)
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String?
+  email        String        @unique
+  passwordHash String? // nulo quando o login é só via Google
+  image        String?
+  role         Role          @default(CLIENT)
+  country      String?
+  createdAt    DateTime      @default(now())
+  applications Application[]
+  case         Case?
+}
+
+model Eb3Job {
+  id           String        @id @default(cuid())
+  title        String // "Auxiliar de Cozinha"
+  employer     String // "Blue Ridge Hospitality"
+  logo         String? // iniciais exibidas no card (ex.: "BR")
+  location     String // "Asheville, NC"
+  type         String // "Tempo integral"
+  visa         String // "EB-3 · Unskilled"
+  salary       String // "$15.50/h"
+  openings     Int           @default(1)
+  postedLabel  String? // rótulo livre tipo "2 dias atrás" (opcional)
+  description  String // descritivo da vaga (escrito pela equipe)
+  requirements String[] // lista de requisitos
+  published    Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  questions    JobQuestion[]
+  applications Application[]
+}
+
+// Perguntas fixas do questionário, configuráveis por vaga.
+model JobQuestion {
+  id       String       @id @default(cuid())
+  jobId    String
+  job      Eb3Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  order    Int          @default(0)
+  label    String
+  helpText String?
+  type     QuestionType @default(TEXT)
+  required Boolean      @default(true)
+
+  @@index([jobId])
+}
+
+// Uma aplicação do cliente a uma vaga, com as respostas e a prova de
+// aceite (consentimento) registrada no momento da submissão.
+model Application {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId           String
+  job             Eb3Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  answers         Json // [{ questionId, label, answer }]
+  consentAccepted Boolean  @default(false)
+  consentText     String // texto exato do aviso aceito
+  consentAt       DateTime // data/hora do aceite
+  consentIp       String? // IP de origem do aceite (prova adicional)
+  emailSentAt     DateTime? // quando o e-mail para info@kick-start.us foi enviado
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([jobId])
+}
+
+// O processo EB-3 de um cliente (1 caso por cliente).
+model Case {
+  id        String      @id @default(cuid())
+  userId    String      @unique
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caseNo    String      @unique // "KS-2026-0047"
+  country   String?
+  manager   String? // "Daia · Kick Start Team"
+  jobLabel  String? // "Auxiliar de Cozinha · Blue Ridge Hospitality"
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  phases    CasePhase[]
+}
+
+// As 4 fases fixas: Selection → DOL/PERM → I-140 → I-485/Consular.
+model CasePhase {
+  id       String     @id @default(cuid())
+  caseId   String
+  case     Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  key      String // sel | dol | i140 | i485
+  order    Int
+  icon     String // ícone Tabler (ex.: "clipboard-check")
+  title    String
+  subtitle String?
+  notes    String     @default("") // "Notas da equipe" (somente leitura p/ cliente)
+  steps    CaseStep[]
+
+  @@index([caseId])
+}
+
+// Sub-etapas de cada fase, com status próprio.
+model CaseStep {
+  id      String     @id @default(cuid())
+  phaseId String
+  phase   CasePhase  @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  order   Int
+  name    String
+  sub     String?
+  status  CaseStatus @default(NONE)
+
+  @@index([phaseId])
+}
