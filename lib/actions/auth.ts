@@ -51,10 +51,18 @@ export async function loginWithCredentials(
   }
 }
 
+// Senha forte: 8+ caracteres, ao menos 1 maiúscula, 1 número e 1 especial.
+const strongPassword = z
+  .string()
+  .min(8, "A senha deve ter no mínimo 8 caracteres.")
+  .regex(/[A-Z]/, "A senha deve conter ao menos uma letra maiúscula.")
+  .regex(/[0-9]/, "A senha deve conter ao menos um número.")
+  .regex(/[^A-Za-z0-9]/, "A senha deve conter ao menos um caractere especial.");
+
 const registerSchema = z.object({
   name: z.string().min(2, "Informe seu nome completo."),
   email: z.string().email("Informe um email válido."),
-  password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres."),
+  password: strongPassword,
 });
 
 // Cadastro gratuito por email/senha. Cria a conta e já loga, indo para a

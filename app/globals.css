@@ -418,6 +418,22 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.6; }
 .formmsg--error { background: var(--st-denied-bg); color: var(--st-denied); border: 1px solid var(--st-denied-bd); }
 .formmsg--ok { background: var(--st-approved-bg); color: var(--st-approved); border: 1px solid var(--st-approved-bd); }
 
+/* medidor de força da senha (cadastro) */
+.pwmeter { margin-top: 10px; }
+.pwmeter__bars { display: flex; gap: 6px; }
+.pwmeter__bar { flex: 1; height: 6px; border-radius: 30px; background: var(--bg-2); transition: background .2s; }
+.pwmeter__bar.is-on.t-weak   { background: var(--st-denied); }
+.pwmeter__bar.is-on.t-medium { background: var(--st-pending-dot); }
+.pwmeter__bar.is-on.t-strong { background: var(--st-approved); }
+.pwmeter__label { font-family: var(--font-title); font-weight: 600; font-size: 12px; margin-top: 6px; }
+.pwmeter__label.t-weak   { color: var(--st-denied); }
+.pwmeter__label.t-medium { color: var(--st-pending); }
+.pwmeter__label.t-strong { color: var(--st-approved); }
+.pwreqs { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+.pwreqs li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-4); transition: color .15s; }
+.pwreqs li.ok { color: var(--st-approved); }
+.pwreqs li i { font-size: 14px; }
+
 /* tela de sucesso da aplicação */
 .success { max-width: 620px; margin: 0 auto; padding: 60px 28px; text-align: center; }
 .success__badge { width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;

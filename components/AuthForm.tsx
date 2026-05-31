@@ -4,6 +4,8 @@ import { useActionState, useState } from "react";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
 import { GoogleG } from "./GoogleG";
+import { PasswordStrength } from "./PasswordStrength";
+import { passwordChecks } from "@/lib/util";
 import {
   googleSignIn,
   loginWithCredentials,
@@ -19,6 +21,8 @@ export function AuthForm() {
 
   const [loginState, loginAction, loginPending] = useActionState(loginWithCredentials, initial);
   const [signupState, signupAction, signupPending] = useActionState(registerUser, initial);
+  const [signupPw, setSignupPw] = useState("");
+  const pwStrong = passwordChecks(signupPw).strong;
 
   const state = isSignup ? signupState : loginState;
   const pending = isSignup ? signupPending : loginPending;
@@ -96,7 +100,7 @@ export function AuthForm() {
               <label className="field__label">Nome completo</label>
               <div className="inputwrap">
                 <Icon n="user" />
-                <input className="input input--icon" name="name" placeholder="Eduardo Henrique" />
+                <input className="input input--icon" name="name" placeholder="Seu Nome" />
               </div>
             </div>
             <div className="field">
@@ -110,11 +114,23 @@ export function AuthForm() {
               <label className="field__label">Senha</label>
               <div className="inputwrap">
                 <Icon n="lock" />
-                <input className="input input--icon" type="password" name="password" placeholder="••••••••" />
+                <input
+                  className="input input--icon"
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={signupPw}
+                  onChange={(e) => setSignupPw(e.target.value)}
+                />
               </div>
-              <div className="field__hint">Mínimo de 8 caracteres.</div>
+              <PasswordStrength value={signupPw} />
             </div>
-            <button className="btn btn--primary btn--block btn--lg" type="submit" disabled={pending} style={{ marginTop: 6 }}>
+            <button
+              className="btn btn--primary btn--block btn--lg"
+              type="submit"
+              disabled={pending || !pwStrong}
+              style={{ marginTop: 6 }}
+            >
               {pending ? "Criando…" : "Criar conta gratuita"} <Icon n="arrow-right" />
             </button>
             <p className="legal">
