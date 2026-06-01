@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "./Icon";
 import { StatusBadge } from "./Status";
@@ -35,6 +36,32 @@ export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
     const mf = filter === "all" || c.status === filter;
     return mq && mf;
   });
+
+  // Nenhum caso aberto ainda (não é questão de filtro).
+  if (cases.length === 0) {
+    return (
+      <div className="card">
+        <div className="empty">
+          <div className="empty__ic">
+            <Icon n="folder-off" />
+          </div>
+          <h3>Nenhum caso aberto ainda</h3>
+          <p>
+            As candidaturas recebidas ficam em &quot;Candidaturas&quot;. Abra um caso a partir de uma
+            candidatura para começar a acompanhar o processo do cliente.
+          </p>
+          <div className="welcome__actions" style={{ marginTop: 18 }}>
+            <Link className="btn btn--primary" href="/admin/candidaturas">
+              <Icon n="send" /> Ver candidaturas
+            </Link>
+            <Link className="btn btn--ghost" href="/admin/casos/novo">
+              <Icon n="plus" /> Abrir caso manualmente
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

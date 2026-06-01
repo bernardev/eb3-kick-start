@@ -18,6 +18,7 @@ const CLIENT_NAV: NavItem[] = [
 
 const ADMIN_NAV: NavItem[] = [
   { href: "/admin", icon: "layout-grid", label: "Casos", match: (p) => p === "/admin" || p.startsWith("/admin/casos") },
+  { href: "/admin/candidaturas", icon: "send", label: "Candidaturas", match: (p) => p.startsWith("/admin/candidaturas") },
   { href: "/admin/vagas", icon: "briefcase", label: "Vagas", match: (p) => p.startsWith("/admin/vagas") },
 ];
 

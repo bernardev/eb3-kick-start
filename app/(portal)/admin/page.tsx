@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { deriveCaseSummary, type StatusKey } from "@/lib/status";
 import { initials } from "@/lib/util";
+import { Icon } from "@/components/Icon";
 import { AdminCaseList, type AdminCaseRow } from "@/components/AdminCaseList";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +51,9 @@ export default async function AdminPage() {
           <h1>Gestão de casos EB-3</h1>
           <p>Acompanhe e atualize o andamento de cada cliente.</p>
         </div>
+        <Link className="btn btn--primary" href="/admin/casos/novo">
+          <Icon n="plus" /> Novo caso
+        </Link>
       </div>
 
       <div className="statline">
