@@ -16,6 +16,19 @@ const API_URL =
 export const WP_JOBS_BOARD_URL =
   process.env.WP_JOBS_BOARD_URL ?? "https://kick-start.us/our-vacancies-all-jobs/";
 
+// Categorias de visto excluídas do feed "Outras vagas". As vagas EB-3 são
+// tratadas na própria área EB-3 do app (no topo), então ficam de fora daqui.
+// Configurável via WP_JOBS_EXCLUDE (lista separada por vírgula).
+const EXCLUDED = (process.env.WP_JOBS_EXCLUDE ?? "EB-3")
+  .split(",")
+  .map((s) => norm(s))
+  .filter(Boolean);
+
+// Normaliza para comparar categorias ignorando caixa/pontuação ("EB-3" → "eb3").
+function norm(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
 // Decodifica entidades HTML comuns que a API retorna nos títulos.
 function decode(s: string): string {
   return s
@@ -57,12 +70,18 @@ function mapJob(j: RawJob): WpJob {
  */
 export async function getWpJobs(limit = 12): Promise<WpJob[]> {
   try {
-    const url = `${API_URL}?per_page=${limit}&orderby=date&order=desc&_embed=1`;
+    // Busca mais do que o necessário para ainda restar `limit` após excluir EB-3.
+    const fetchCount = Math.min(100, limit * 3);
+    const url = `${API_URL}?per_page=${fetchCount}&orderby=date&order=desc&_embed=1`;
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) return [];
     const data = (await res.json()) as RawJob[];
     if (!Array.isArray(data)) return [];
-    return data.map(mapJob);
+
+    return data
+      .map(mapJob)
+      .filter((j) => !(j.visa && EXCLUDED.includes(norm(j.visa))))
+      .slice(0, limit);
   } catch (err) {
     console.error("[EB-3] Falha ao buscar vagas do site (WP):", err);
     return [];

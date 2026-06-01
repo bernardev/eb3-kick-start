@@ -12,7 +12,8 @@ import type { Role } from "@prisma/client";
 type NavItem = { href: string; icon: string; label: string; match: (p: string) => boolean };
 
 const CLIENT_NAV: NavItem[] = [
-  { href: "/vagas", icon: "briefcase", label: "Vagas EB-3", match: (p) => p.startsWith("/vagas") },
+  { href: "/vagas", icon: "briefcase", label: "Vagas EB-3", match: (p) => p === "/vagas" || p.startsWith("/vagas/") },
+  { href: "/outras-vagas", icon: "world-search", label: "Outras vagas", match: (p) => p.startsWith("/outras-vagas") },
   { href: "/meu-processo", icon: "route", label: "Meu Processo", match: (p) => p.startsWith("/meu-processo") },
 ];
 
