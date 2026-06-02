@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
+import { AnswersBlock } from "@/components/AnswersBlock";
 import { createCase } from "@/lib/actions/cases";
 
 export const dynamic = "force-dynamic";
@@ -9,8 +10,6 @@ export const dynamic = "force-dynamic";
 function fmtDateTime(d: Date) {
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(d);
 }
-
-type AnswerItem = { label: string; answer: string };
 
 // Lista de candidaturas recebidas (todas as aplicações às vagas EB-3).
 export default async function CandidaturasPage() {
@@ -46,7 +45,6 @@ export default async function CandidaturasPage() {
         </div>
       ) : (
         applications.map((app) => {
-          const answers = (app.answers as unknown as AnswerItem[]) ?? [];
           const hasCase = !!app.user.case;
           return (
             <div className="card formcard" key={app.id}>
@@ -94,12 +92,7 @@ export default async function CandidaturasPage() {
               </div>
 
               <div style={{ marginTop: 14 }}>
-                {answers.map((a, i) => (
-                  <div className="answer" key={i}>
-                    <div className="answer__q">{a.label}</div>
-                    <div className="answer__a">{a.answer || "—"}</div>
-                  </div>
-                ))}
+                <AnswersBlock appId={app.id} answers={app.answers} />
               </div>
             </div>
           );

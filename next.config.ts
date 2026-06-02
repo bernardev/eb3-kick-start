@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   // O lint roda via `npm run lint`; não bloqueia o build de produção.
   // A checagem de tipos (TypeScript) permanece ativa no build.
   eslint: { ignoreDuringBuilds: true },
+  // @react-pdf/renderer é pesado e roda só no servidor (geração do PDF do G1).
+  serverExternalPackages: ["@react-pdf/renderer"],
 };
 
 export default nextConfig;

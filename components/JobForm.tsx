@@ -41,17 +41,10 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
     description: base.description, published: base.published,
   });
   const [reqText, setReqText] = useState(base.requirements.join("\n"));
-  const [questions, setQuestions] = useState<QuestionDraft[]>(base.questions);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
-
-  const addQuestion = () =>
-    setQuestions((qs) => [...qs, { label: "", helpText: "", type: "TEXT", required: true }]);
-  const updateQuestion = (i: number, patch: Partial<QuestionDraft>) =>
-    setQuestions((qs) => qs.map((q, idx) => (idx === i ? { ...q, ...patch } : q)));
-  const removeQuestion = (i: number) => setQuestions((qs) => qs.filter((_, idx) => idx !== i));
 
   const submit = () => {
     setError(null);
@@ -59,9 +52,8 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
       const res = await saveJob({
         ...f,
         requirements: reqText.split("\n").map((r) => r.trim()).filter(Boolean),
-        questions: questions
-          .map((q) => ({ ...q, label: q.label.trim() }))
-          .filter((q) => q.label.length > 0),
+        // O questionário por vaga foi substituído pelo Formulário G1.
+        questions: base.questions ?? [],
       });
       if (res?.error) setError(res.error);
       // sucesso redireciona no servidor
@@ -141,46 +133,12 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
         </label>
       </div>
 
-      <div className="card formcard">
-        <h3>Perguntas do questionário</h3>
-        <p className="muted" style={{ marginTop: -10, marginBottom: 16, fontSize: 13.5 }}>
-          Estas perguntas aparecem no fluxo &quot;Aplique aqui&quot; desta vaga.
-        </p>
-
-        {questions.length === 0 && (
-          <p className="muted" style={{ marginBottom: 14 }}>Nenhuma pergunta ainda.</p>
-        )}
-
-        {questions.map((q, i) => (
-          <div className="qrow" key={i}>
-            <div className="grow">
-              <input className="input" value={q.label} onChange={(e) => updateQuestion(i, { label: e.target.value })} placeholder={`Pergunta ${i + 1}`} style={{ marginBottom: 8 }} />
-              <div className="formgrid">
-                <input className="input" value={q.helpText} onChange={(e) => updateQuestion(i, { helpText: e.target.value })} placeholder="Texto de ajuda (opcional)" />
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <div className="select" style={{ flex: 1 }}>
-                    <select value={q.type} onChange={(e) => updateQuestion(i, { type: e.target.value as QuestionDraft["type"] })}>
-                      <option value="TEXT">Resposta curta</option>
-                      <option value="TEXTAREA">Resposta longa</option>
-                    </select>
-                    <Icon n="selector" />
-                  </div>
-                  <label className="consent" style={{ margin: 0, padding: "9px 12px" }}>
-                    <input type="checkbox" checked={q.required} onChange={(e) => updateQuestion(i, { required: e.target.checked })} />
-                    <span style={{ fontSize: 13 }}>Obrigatória</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <button type="button" className="iconbtn" onClick={() => removeQuestion(i)} title="Remover pergunta">
-              <Icon n="trash" />
-            </button>
-          </div>
-        ))}
-
-        <button type="button" className="btn btn--ghost btn--sm" onClick={addQuestion} style={{ marginTop: 6 }}>
-          <Icon n="plus" /> Adicionar pergunta
-        </button>
+      <div className="g1note" style={{ marginTop: 4 }}>
+        <Icon n="info-circle" />
+        <div>
+          A aplicação desta vaga usa o <b>Formulário G1</b> (intake completo), igual para todas as
+          vagas EB-3. Não há mais questionário por vaga.
+        </div>
       </div>
 
       <div className="formactions">

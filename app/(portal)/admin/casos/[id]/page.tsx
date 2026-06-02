@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
 import { ProcessView } from "@/components/ProcessView";
+import { AnswersBlock } from "@/components/AnswersBlock";
 import type { UiPhase } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +12,6 @@ export const dynamic = "force-dynamic";
 function fmtDateTime(d: Date) {
   return new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(d);
 }
-
-type AnswerItem = { label: string; answer: string };
 
 // Editor de caso (equipe): status das fases/sub-etapas + notas + respostas.
 export default async function CaseEditPage({
@@ -114,7 +113,6 @@ export default async function CaseEditPage({
         </div>
       ) : (
         applications.map((app) => {
-          const answers = (app.answers as unknown as AnswerItem[]) ?? [];
           return (
             <div className="card formcard" key={app.id}>
               <h3>
@@ -133,12 +131,7 @@ export default async function CaseEditPage({
                   <b>{app.emailSentAt ? "enviado" : "não enviado"}</b>
                 </span>
               </div>
-              {answers.map((a, i) => (
-                <div className="answer" key={i}>
-                  <div className="answer__q">{a.label}</div>
-                  <div className="answer__a">{a.answer || "—"}</div>
-                </div>
-              ))}
+              <AnswersBlock appId={app.id} answers={app.answers} />
             </div>
           );
         })

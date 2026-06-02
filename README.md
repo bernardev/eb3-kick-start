@@ -125,11 +125,12 @@ A Kick teve histórico de e-mails não chegando. Para garantir a entrega em
 ### Como testar o envio
 
 1. Configure as variáveis acima e rode `npm run dev`.
-2. Entre como cliente, abra uma vaga → **Aplique aqui**, responda o
-   questionário, marque o consentimento e envie.
+2. Entre como cliente, abra uma vaga → **Aplique aqui**, preencha o
+   **Formulário G1** (intake), aceite a Declaração + o consentimento e envie.
 3. Confira a caixa `info@kick-start.us` — deve chegar um e-mail com assunto
-   `Nova aplicação EB-3 — {Vaga} — {Cliente}`, contendo as respostas e o
-   registro de consentimento (data/hora + IP).
+   `Nova aplicação G1 — {Vaga} — {Cliente}`, com um **resumo no corpo** e o
+   **PDF do G1 preenchido em anexo**, além do registro de consentimento
+   (data/hora + IP). No admin, cada candidatura tem o botão **"Baixar PDF do G1"**.
 4. No painel da equipe (`/admin/casos/[id]`) cada aplicação mostra também se o
    e-mail foi **enviado** ou **não enviado**.
 

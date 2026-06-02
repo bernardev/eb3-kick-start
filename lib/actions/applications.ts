@@ -3,8 +3,10 @@
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
-import { sendApplicationEmail } from "@/lib/email";
+import { sendApplicationEmail, sendG1Email } from "@/lib/email";
 import { CONSENT_CHECKBOX } from "@/lib/consent";
+import { renderG1Pdf } from "@/lib/g1-pdf";
+import { optLabel, MARITAL_OPTIONS, EDUCATION_OPTIONS, type G1Data } from "@/lib/g1";
 
 export type ApplyState = { ok?: boolean; error?: string };
 
@@ -88,6 +90,104 @@ export async function submitApplication(
     });
   } catch (err) {
     console.error("[EB-3] Falha ao enviar e-mail da aplicação:", err);
+  }
+
+  return { ok: true };
+}
+
+export type G1SubmitState = { ok?: boolean; error?: string };
+
+// Recebe a aplicação via Formulário G1: valida consentimento + declaração,
+// salva o G1 (JSON) no banco com prova de aceite, gera o PDF preenchido e
+// envia para a equipe (info@kick-start.us) com o PDF em anexo.
+export async function submitG1(input: {
+  jobId: string;
+  data: G1Data;
+  consent: boolean;
+}): Promise<G1SubmitState> {
+  const user = await requireUser();
+
+  const job = await prisma.eb3Job.findFirst({ where: { id: input.jobId, published: true } });
+  if (!job) return { error: "Vaga não encontrada ou indisponível." };
+
+  if (!input.data?.declaration?.agreed) {
+    return { error: "É preciso aceitar a Declaração para enviar." };
+  }
+  if (!input.consent) {
+    return { error: "É necessário marcar o consentimento para enviar a aplicação." };
+  }
+
+  const d = input.data;
+  // Validação mínima dos campos essenciais.
+  if (!d.personal.firstName.trim() || !d.personal.lastName.trim()) {
+    return { error: "Preencha ao menos Nome e Sobrenome." };
+  }
+  if (!d.additional.email.trim()) {
+    return { error: "Preencha o e-mail (seção Informações Adicionais)." };
+  }
+
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || null;
+  const now = new Date();
+
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+  const applicantName =
+    `${d.personal.firstName} ${d.personal.lastName}`.trim() || dbUser?.name || "—";
+
+  const application = await prisma.application.create({
+    data: {
+      userId: user.id,
+      jobId: job.id,
+      answers: d as unknown as object, // G1 completo em JSON
+      consentAccepted: true,
+      consentText: CONSENT_CHECKBOX,
+      consentAt: now,
+      consentIp: ip,
+    },
+  });
+
+  // Gera PDF + envia e-mail com anexo. Se falhar, a aplicação já está salva.
+  try {
+    const pdf = await renderG1Pdf(d, {
+      jobTitle: job.title,
+      jobEmployer: job.employer,
+      jobVisa: job.visa,
+      applicantName,
+      applicantEmail: d.additional.email || dbUser?.email || "—",
+      submittedAt: now,
+    });
+
+    const summary = [
+      { label: "Nome / Name", value: applicantName },
+      { label: "Data de nascimento / DOB", value: d.address.dob },
+      { label: "E-mail (G1)", value: d.additional.email },
+      { label: "Telefone / Phone", value: d.address.phone },
+      { label: "Estado civil / Marital", value: optLabel(MARITAL_OPTIONS, d.personal.maritalStatus) },
+      { label: "Educação / Education", value: optLabel(EDUCATION_OPTIONS, d.education.level) },
+      { label: "Empregador atual / Current employer", value: `${d.currentEmployment.employer} ${d.currentEmployment.jobTitle}`.trim() },
+      { label: "Cidadania / Citizenship", value: d.address.citizenship },
+    ];
+
+    await sendG1Email({
+      jobTitle: job.title,
+      jobEmployer: job.employer,
+      jobVisa: job.visa,
+      applicantName,
+      applicantEmail: d.additional.email || dbUser?.email || "—",
+      applicantId: user.id,
+      applicationId: application.id,
+      submittedAt: now,
+      consentText: CONSENT_CHECKBOX,
+      consentIp: ip,
+      summary,
+      pdf,
+      pdfFilename: `G1-${applicantName.replace(/[^a-zA-Z0-9]+/g, "-")}.pdf`,
+    });
+
+    await prisma.application.update({ where: { id: application.id }, data: { emailSentAt: new Date() } });
+  } catch (err) {
+    console.error("[EB-3] Falha ao gerar/enviar e-mail do G1:", err);
   }
 
   return { ok: true };

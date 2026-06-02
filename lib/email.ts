@@ -110,6 +110,95 @@ function buildText(d: ApplicationEmailData) {
   return lines.filter(Boolean).join("\n");
 }
 
+// ---- E-mail da aplicação G1 (com PDF do formulário em anexo) ----
+export type G1EmailData = {
+  jobTitle: string;
+  jobEmployer: string;
+  jobVisa: string;
+  applicantName: string;
+  applicantEmail: string;
+  applicantId: string;
+  applicationId: string;
+  submittedAt: Date;
+  consentText: string;
+  consentIp?: string | null;
+  summary: { label: string; value: string }[]; // resumo de campos-chave
+  pdf: Buffer;
+  pdfFilename: string;
+};
+
+function buildG1Html(d: G1EmailData) {
+  const fmt = new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "long", timeStyle: "short", timeZone: "America/Sao_Paulo",
+  }).format(d.submittedAt);
+
+  const rows = d.summary
+    .map(
+      (a) => `
+      <tr>
+        <td style="padding:8px 0;border-bottom:1px solid #e7e9f0;color:#8a92a4;font-size:13px;font-weight:600;width:42%;vertical-align:top">${esc(a.label)}</td>
+        <td style="padding:8px 0 8px 14px;border-bottom:1px solid #e7e9f0;color:#181b24;font-size:14px">${esc(a.value || "—")}</td>
+      </tr>`,
+    )
+    .join("");
+
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#181b24">
+    <div style="background:${BRAND};color:#fff;padding:22px 26px;border-radius:12px 12px 0 0">
+      <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.8">Portal EB-3 · Kick Start · G1 Form</div>
+      <div style="font-size:20px;font-weight:700;margin-top:4px">Nova aplicação (Formulário G1)</div>
+    </div>
+    <div style="border:1px solid #e7e9f0;border-top:none;border-radius:0 0 12px 12px;padding:26px">
+      <h2 style="font-size:16px;margin:0 0 10px">Vaga</h2>
+      <p style="margin:0 0 4px;font-size:15px;font-weight:700">${esc(d.jobTitle)}</p>
+      <p style="margin:0 0 18px;color:#545c6e;font-size:14px">${esc(d.jobEmployer)} · ${esc(d.jobVisa)}</p>
+
+      <h2 style="font-size:16px;margin:18px 0 10px">Candidato</h2>
+      <p style="margin:0 0 4px;font-size:15px;font-weight:700">${esc(d.applicantName)}</p>
+      <p style="margin:0;color:#545c6e;font-size:14px">${esc(d.applicantEmail)}</p>
+      <p style="margin:6px 0 0;color:#8a92a4;font-size:12px">ID cliente: ${esc(d.applicantId)} · ID aplicação: ${esc(d.applicationId)}</p>
+
+      <div style="margin-top:18px;background:#fcf3d7;border:1px solid #ecd384;border-radius:10px;padding:12px 14px;font-size:13px;color:#545c6e">
+        📎 O formulário G1 completo está no <b>PDF em anexo</b> (${esc(d.pdfFilename)}).
+      </div>
+
+      <h2 style="font-size:16px;margin:22px 0 6px">Resumo</h2>
+      <table style="width:100%;border-collapse:collapse">${rows}</table>
+
+      <div style="margin-top:24px;background:#e7f5ec;border:1px solid #b3ddc3;border-radius:10px;padding:14px 16px">
+        <div style="font-size:13px;font-weight:700;color:#1f9254;margin-bottom:6px">Consentimento registrado</div>
+        <div style="font-size:13px;color:#545c6e;line-height:1.5">"${esc(d.consentText)}"</div>
+        <div style="font-size:12px;color:#8a92a4;margin-top:8px">Aceite em ${fmt}${d.consentIp ? ` · IP ${esc(d.consentIp)}` : ""}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/**
+ * Envia o e-mail da aplicação G1 (resumo no corpo + PDF completo em anexo)
+ * para a caixa da equipe (MAIL_TO). Lança erro se o Resend não estiver
+ * configurado ou se a API falhar.
+ */
+export async function sendG1Email(d: G1EmailData) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.MAIL_FROM;
+  const to = process.env.MAIL_TO ?? "info@kick-start.us";
+  if (!apiKey || !from) {
+    throw new Error("E-mail não configurado: defina RESEND_API_KEY e MAIL_FROM no ambiente.");
+  }
+
+  const resend = new Resend(apiKey);
+  const { error } = await resend.emails.send({
+    from,
+    to,
+    replyTo: d.applicantEmail,
+    subject: `Nova aplicação G1 — ${d.jobTitle} — ${d.applicantName}`,
+    html: buildG1Html(d),
+    attachments: [{ filename: d.pdfFilename, content: d.pdf }],
+  });
+  if (error) throw new Error(`Falha ao enviar e-mail (Resend): ${error.message}`);
+}
+
 /**
  * Envia o e-mail da aplicação para a caixa da equipe (MAIL_TO).
  * Lança erro se o Resend não estiver configurado ou se a API falhar —
