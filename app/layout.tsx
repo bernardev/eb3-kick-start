@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 // Viewport mobile + cor da barra do navegador (web app).
+// (sem viewport-fit:cover — evita conteúdo sob a Dynamic Island/home no iPhone)
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",
   themeColor: "#4b0019",
 };
 
