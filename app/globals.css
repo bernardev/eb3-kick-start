@@ -505,11 +505,94 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.6; }
   .formgrid { grid-template-columns: 1fr; }
 }
 @media (max-width: 680px) {
-  .appbar { padding: 0 14px; gap: 12px; }
-  .appbar__nav { display: none; }
-  .userpill__name, .userpill__role { display: none; }
   .container { padding: 24px 16px 44px; }
   .jobgrid { grid-template-columns: 1fr; }
   .step__select { width: 150px; }
   .tl__node { width: 70px; }
+}
+
+/* ============================================================ MOBILE / WEB APP
+   Camada responsiva — só dentro de media queries (desktop intacto).
+   Navegação inferior fixa + ajustes de densidade e tabelas. */
+
+/* barra inferior: escondida no desktop */
+.bottomnav { display: none; }
+
+@media (max-width: 768px) {
+  /* --- header enxuto --- */
+  .appbar { padding: 0 14px; gap: 10px; height: 58px; }
+  .appbar__nav { display: none; }                 /* nav vai pra barra inferior */
+  .userpill__name, .userpill__role { display: none; }
+  .appbar__right { gap: 8px; }
+  .langtoggle__btn { padding: 5px 9px; }
+
+  /* --- barra de navegação inferior (app-like) --- */
+  .bottomnav {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    background: var(--brand-deep); border-top: 1px solid rgba(255,255,255,.08);
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); justify-content: space-around;
+    box-shadow: 0 -6px 22px -10px rgba(0,0,0,.45);
+  }
+  .bottomnav__item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 7px 4px; border-radius: 12px; color: rgba(255,255,255,.62); text-decoration: none;
+    font-family: var(--font-title); font-weight: 600; font-size: 10.5px; text-align: center; line-height: 1.15; }
+  .bottomnav__item i { font-size: 22px; }
+  .bottomnav__item.is-active { color: #fff; background: rgba(255,255,255,.13); }
+  .has-bottomnav .main { padding-bottom: calc(62px + env(safe-area-inset-bottom)); }
+
+  /* --- densidade / títulos --- */
+  .container { padding: 20px 14px 34px; }
+  .pagehead { gap: 12px; margin-bottom: 22px; }
+  .pagehead h1 { font-size: 23px; }
+  .casehead h1 { font-size: 22px; }
+
+  /* --- tabelas: rolagem horizontal sem cortar conteúdo --- */
+  .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.tbl { min-width: 560px; }
+
+  /* --- timeline rola se necessário --- */
+  .progresscard { overflow: hidden; }
+  .tl { overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+  .tl__node { width: 80px; }
+
+  /* --- estatísticas em 2 colunas --- */
+  .statline { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { min-width: 0; }
+
+  /* --- ações de formulário empilhadas e full-width (toque fácil) --- */
+  .formactions { flex-direction: column; align-items: stretch; }
+  .formactions .btn, .formactions a.btn { width: 100%; justify-content: center; margin-left: 0; }
+
+  /* --- cabeçalhos de detalhe/caso: botão full-width --- */
+  .jd__head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .jd__head .btn { width: 100%; }
+  .casehead .btn, .casehead .select { width: 100%; }
+
+  /* --- welcome / auth --- */
+  .welcome { padding: 36px 16px; }
+  .welcome h1 { font-size: 26px; }
+  .welcome__actions .btn { width: 100%; }
+  .auth__form { padding: 26px 16px; }
+
+  /* --- vagas em coluna única --- */
+  .jobgrid { grid-template-columns: 1fr; }
+
+  /* --- fases / G1 confortáveis ao toque --- */
+  .phase__head { gap: 12px; padding: 14px 16px; }
+  .phase__body { padding: 0 16px 18px; }
+  .phase__sub { display: none; }
+  .step { flex-wrap: wrap; }
+  .step__select { width: 100%; }
+  .g1opt { padding: 9px 12px; font-size: 13px; }
+  .notice, .consent, .g1note { padding: 13px 14px; }
+
+  /* --- intro de vagas empilha o badge --- */
+  .jobs__intro { flex-wrap: wrap; }
+  .jobs__intro .badge { margin-left: 0; }
+}
+
+@media (max-width: 400px) {
+  .pagehead h1 { font-size: 21px; }
+  .bottomnav__item span { font-size: 9.5px; }
+  .freechip { font-size: 11px; }
 }

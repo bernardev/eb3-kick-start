@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/Logo";
 import { AppBar } from "@/components/AppBar";
+import { BottomNav } from "@/components/BottomNav";
 import { requireUser } from "@/lib/guards";
 
 // Layout das páginas autenticadas: header (appbar) + conteúdo + rodapé.
@@ -13,7 +14,7 @@ export default async function PortalLayout({
   const t = await getTranslations("footer");
 
   return (
-    <div className="app">
+    <div className="app has-bottomnav">
       <AppBar name={user.name ?? "Usuário"} role={user.role} image={user.image} />
       <div className="shell">
         <main className="main">
@@ -33,6 +34,7 @@ export default async function PortalLayout({
           </footer>
         </main>
       </div>
+      <BottomNav role={user.role} />
     </div>
   );
 }
