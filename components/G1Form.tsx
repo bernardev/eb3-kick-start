@@ -323,15 +323,24 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
         </div>
         <YesNo question={t("violatedTerms")} value={data.visaCompliance.violatedTerms} onChange={(v) => set(["visaCompliance", "violatedTerms"], v)} />
         {data.visaCompliance.violatedTerms === "YES" && (
-          <textarea className="input" style={{ minHeight: 70, marginBottom: 12 }} placeholder={t("details")} value={data.visaCompliance.violatedDetails} onChange={(e) => set(["visaCompliance", "violatedDetails"], e.target.value)} />
+          <div className="field" style={{ marginBottom: 12 }}>
+            <label className="field__label">{t("ifYesExplain")}</label>
+            <textarea className="input" style={{ minHeight: 80 }} value={data.visaCompliance.violatedDetails} onChange={(e) => set(["visaCompliance", "violatedDetails"], e.target.value)} />
+          </div>
         )}
         <YesNo question={t("arrested")} value={data.visaCompliance.arrested} onChange={(v) => set(["visaCompliance", "arrested"], v)} />
         {data.visaCompliance.arrested === "YES" && (
-          <textarea className="input" style={{ minHeight: 70, marginBottom: 12 }} placeholder={t("details")} value={data.visaCompliance.arrestedDetails} onChange={(e) => set(["visaCompliance", "arrestedDetails"], e.target.value)} />
+          <div className="field" style={{ marginBottom: 12 }}>
+            <label className="field__label">{t("ifYesExplain")}</label>
+            <textarea className="input" style={{ minHeight: 80 }} value={data.visaCompliance.arrestedDetails} onChange={(e) => set(["visaCompliance", "arrestedDetails"], e.target.value)} />
+          </div>
         )}
         <YesNo question={t("stayedOver6m")} value={data.visaCompliance.stayedOver6m} onChange={(v) => set(["visaCompliance", "stayedOver6m"], v)} />
         {data.visaCompliance.stayedOver6m === "YES" && (
-          <textarea className="input" style={{ minHeight: 70 }} placeholder={t("details")} value={data.visaCompliance.stayedDetails} onChange={(e) => set(["visaCompliance", "stayedDetails"], e.target.value)} />
+          <div className="field">
+            <label className="field__label">{t("ifYesExplain")}</label>
+            <textarea className="input" style={{ minHeight: 80 }} value={data.visaCompliance.stayedDetails} onChange={(e) => set(["visaCompliance", "stayedDetails"], e.target.value)} />
+          </div>
         )}
       </SectionCard>
 

@@ -137,6 +137,7 @@
     "arrested": "Have you ever been arrested anywhere?",
     "stayedOver6m": "Have you/family ever stayed in the U.S. over 6 months?",
     "details": "Details",
+    "ifYesExplain": "If yes, give details and explain:",
     "addRow": "Add row",
     "gcHistory": "Describe in detail",
     "childrenMedicare": "Have your children ever received Medicare in the U.S.?",
