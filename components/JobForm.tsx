@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Icon } from "./Icon";
 import { saveJob, deleteJob } from "@/lib/actions/jobs";
@@ -32,6 +33,7 @@ const EMPTY: JobFormData = {
 
 export function JobForm({ initial }: { initial?: JobFormData }) {
   const router = useRouter();
+  const t = useTranslations("jobForm");
   const base = initial ?? EMPTY;
 
   const [f, setF] = useState<Omit<JobFormData, "requirements" | "questions">>({
@@ -62,7 +64,7 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
 
   const onDelete = () => {
     if (!f.id) return;
-    if (!confirm("Remover esta vaga? As aplicações ligadas a ela também serão removidas.")) return;
+    if (!confirm(t("removeConfirm"))) return;
     startTransition(async () => {
       await deleteJob(f.id!);
     });
@@ -77,80 +79,77 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
       )}
 
       <div className="card formcard">
-        <h3>Dados da vaga</h3>
+        <h3>{t("data")}</h3>
         <div className="formgrid">
           <div className="field">
-            <label className="field__label">Título</label>
+            <label className="field__label">{t("fTitle")}</label>
             <input className="input" value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Auxiliar de Cozinha" />
           </div>
           <div className="field">
-            <label className="field__label">Empregador</label>
+            <label className="field__label">{t("employer")}</label>
             <input className="input" value={f.employer} onChange={(e) => set("employer", e.target.value)} placeholder="Blue Ridge Hospitality" />
           </div>
           <div className="field">
-            <label className="field__label">Localização</label>
+            <label className="field__label">{t("location")}</label>
             <input className="input" value={f.location} onChange={(e) => set("location", e.target.value)} placeholder="Asheville, NC" />
           </div>
           <div className="field">
-            <label className="field__label">Tipo</label>
+            <label className="field__label">{t("type")}</label>
             <input className="input" value={f.type} onChange={(e) => set("type", e.target.value)} placeholder="Tempo integral" />
           </div>
           <div className="field">
-            <label className="field__label">Categoria do visto</label>
+            <label className="field__label">{t("visa")}</label>
             <input className="input" value={f.visa} onChange={(e) => set("visa", e.target.value)} placeholder="EB-3 · Unskilled" />
           </div>
           <div className="field">
-            <label className="field__label">Salário</label>
+            <label className="field__label">{t("salary")}</label>
             <input className="input" value={f.salary} onChange={(e) => set("salary", e.target.value)} placeholder="$15.50/h" />
           </div>
           <div className="field">
-            <label className="field__label">Vagas abertas</label>
+            <label className="field__label">{t("openings")}</label>
             <input className="input" type="number" min={1} value={f.openings} onChange={(e) => set("openings", Number(e.target.value))} />
           </div>
           <div className="field">
-            <label className="field__label">Iniciais do logo (opcional)</label>
+            <label className="field__label">{t("logo")}</label>
             <input className="input" maxLength={4} value={f.logo} onChange={(e) => set("logo", e.target.value)} placeholder="BR" />
           </div>
           <div className="field">
-            <label className="field__label">Rótulo de publicação (opcional)</label>
+            <label className="field__label">{t("postedLabel")}</label>
             <input className="input" value={f.postedLabel} onChange={(e) => set("postedLabel", e.target.value)} placeholder="2 dias atrás" />
           </div>
         </div>
 
         <div className="field" style={{ marginTop: 16 }}>
-          <label className="field__label">Descrição da vaga</label>
-          <textarea className="input" style={{ minHeight: 110 }} value={f.description} onChange={(e) => set("description", e.target.value)} placeholder="Descreva a posição, o empregador e o patrocínio EB-3…" />
+          <label className="field__label">{t("description")}</label>
+          <textarea className="input" style={{ minHeight: 110 }} value={f.description} onChange={(e) => set("description", e.target.value)} placeholder={t("descriptionPlaceholder")} />
         </div>
 
         <div className="field">
-          <label className="field__label">Requisitos (um por linha)</label>
-          <textarea className="input" style={{ minHeight: 90 }} value={reqText} onChange={(e) => setReqText(e.target.value)} placeholder={"Sem exigência de inglês avançado\nMaior de 18 anos\nPassaporte válido"} />
+          <label className="field__label">{t("requirements")}</label>
+          <textarea className="input" style={{ minHeight: 90 }} value={reqText} onChange={(e) => setReqText(e.target.value)} />
         </div>
 
         <label className="consent" style={{ marginBottom: 0 }}>
           <input type="checkbox" checked={f.published} onChange={(e) => set("published", e.target.checked)} />
-          <span>Publicada (visível para os clientes)</span>
+          <span>{t("publishedLabel")}</span>
         </label>
       </div>
 
       <div className="g1note" style={{ marginTop: 4 }}>
         <Icon n="info-circle" />
-        <div>
-          A aplicação desta vaga usa o <b>Formulário G1</b> (intake completo), igual para todas as
-          vagas EB-3. Não há mais questionário por vaga.
-        </div>
+        <div>{t("g1Note")}</div>
       </div>
 
       <div className="formactions">
         <button className="btn btn--primary btn--lg" onClick={submit} disabled={pending}>
-          <Icon n="device-floppy" /> {pending ? "Salvando…" : "Salvar vaga"}
+          <Icon n="device-floppy" /> {pending ? t("saving") : t("save")}
         </button>
         <button className="btn btn--ghost" onClick={() => router.push("/admin/vagas")} disabled={pending} type="button">
-          Cancelar
+          {t("cancel")}
         </button>
         {f.id && (
           <button className="btn btn--quiet" onClick={onDelete} disabled={pending} type="button" style={{ marginLeft: "auto", color: "var(--st-denied)" }}>
-            <Icon n="trash" /> Remover vaga
+            <Icon n="trash" /> {t("removeJob")}
           </button>
         )}
       </div>

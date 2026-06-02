@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
@@ -14,6 +15,7 @@ export default async function JobDetailPage({
 }) {
   await requireUser();
   const { id } = await params;
+  const t = await getTranslations("jobDetail");
 
   const job = await prisma.eb3Job.findFirst({
     where: { id, published: true },
@@ -25,7 +27,7 @@ export default async function JobDetailPage({
   return (
     <div className="container">
       <div className="crumbs">
-        <Link href="/vagas">Vagas EB-3</Link> <Icon n="chevron-right" /> <span>{job.title}</span>
+        <Link href="/vagas">{t("breadcrumb")}</Link> <Icon n="chevron-right" /> <span>{job.title}</span>
       </div>
 
       <div className="jd__head">
@@ -40,7 +42,7 @@ export default async function JobDetailPage({
           </div>
         </div>
         <Link className="btn btn--primary btn--lg" href={`/vagas/${job.id}/aplicar`}>
-          <Icon n="send" /> Aplique aqui
+          <Icon n="send" /> {t("applyHere")}
         </Link>
       </div>
 
@@ -48,37 +50,37 @@ export default async function JobDetailPage({
         <div>
           <div className="metagrid">
             <div className="metagrid__cell">
-              <div className="kicker">Localização</div>
+              <div className="kicker">{t("location")}</div>
               <div className="val">
                 <Icon n="map-pin" /> {job.location}
               </div>
             </div>
             <div className="metagrid__cell">
-              <div className="kicker">Tipo</div>
+              <div className="kicker">{t("type")}</div>
               <div className="val">
                 <Icon n="clock" /> {job.type}
               </div>
             </div>
             <div className="metagrid__cell">
-              <div className="kicker">Salário base</div>
+              <div className="kicker">{t("baseSalary")}</div>
               <div className="val">
                 <Icon n="cash" /> {job.salary}
               </div>
             </div>
             <div className="metagrid__cell">
-              <div className="kicker">Vagas abertas</div>
+              <div className="kicker">{t("openings")}</div>
               <div className="val">
-                <Icon n="users" /> {job.openings} posições
+                <Icon n="users" /> {t("positions", { count: job.openings })}
               </div>
             </div>
           </div>
 
           <div className="jd__section">
-            <h3>Sobre a vaga</h3>
+            <h3>{t("about")}</h3>
             <p>{job.description}</p>
           </div>
           <div className="jd__section">
-            <h3>Requisitos</h3>
+            <h3>{t("requirements")}</h3>
             <ul className="blist">
               {job.requirements.map((r, i) => (
                 <li key={i}>
@@ -88,35 +90,32 @@ export default async function JobDetailPage({
             </ul>
           </div>
           <div className="jd__section">
-            <h3>Sobre o patrocínio EB-3</h3>
-            <p>
-              Esta posição oferece patrocínio do Green Card pela categoria EB-3. A Kick Start
-              acompanha todas as etapas legais — DOL/PERM, I-140 e I-485/Consular — junto com você.
-            </p>
+            <h3>{t("aboutSponsorship")}</h3>
+            <p>{t("sponsorshipText")}</p>
           </div>
         </div>
 
         <aside className="jd__aside">
           <div className="card applycard">
             <div className="applycard__sal">
-              {job.salary} <small>· salário base</small>
+              {job.salary} <small>{t("baseSalarySuffix")}</small>
             </div>
             <hr />
             <div className="applycard__row">
-              <span>Tipo de visto</span>
+              <span>{t("visaType")}</span>
               <span>{job.visa}</span>
             </div>
             <div className="applycard__row">
-              <span>Localização</span>
+              <span>{t("location")}</span>
               <span>{job.location}</span>
             </div>
             <div className="applycard__row">
-              <span>Vagas</span>
+              <span>{t("openingsShort")}</span>
               <span>{job.openings}</span>
             </div>
             {job.postedLabel && (
               <div className="applycard__row">
-                <span>Publicada</span>
+                <span>{t("posted")}</span>
                 <span>{job.postedLabel}</span>
               </div>
             )}
@@ -125,7 +124,7 @@ export default async function JobDetailPage({
               href={`/vagas/${job.id}/aplicar`}
               style={{ marginTop: 16 }}
             >
-              <Icon n="send" /> Aplique aqui
+              <Icon n="send" /> {t("applyHere")}
             </Link>
           </div>
         </aside>

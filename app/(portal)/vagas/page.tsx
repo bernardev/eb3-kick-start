@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { JobsList } from "@/components/JobsList";
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function VagasPage() {
   await requireUser();
+  const t = await getTranslations("jobs");
 
   const jobs = await prisma.eb3Job.findMany({
     where: { published: true },
@@ -21,9 +23,9 @@ export default async function VagasPage() {
     <div className="container">
       <div className="pagehead">
         <div>
-          <div className="kicker">Oportunidades</div>
-          <h1>Vagas com patrocínio EB-3</h1>
-          <p>Posições verificadas, exclusivas do programa de Green Card por trabalho.</p>
+          <div className="kicker">{t("kicker")}</div>
+          <h1>{t("title")}</h1>
+          <p>{t("subtitle")}</p>
         </div>
       </div>
       <JobsList jobs={jobs} />

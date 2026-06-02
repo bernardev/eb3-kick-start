@@ -3,24 +3,26 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
+import { LocaleToggle } from "./LocaleToggle";
 import { signOutAction } from "@/lib/actions/auth";
 import { initials } from "@/lib/util";
 import type { Role } from "@prisma/client";
 
-type NavItem = { href: string; icon: string; label: string; match: (p: string) => boolean };
+type NavItem = { href: string; icon: string; labelKey: string; match: (p: string) => boolean };
 
 const CLIENT_NAV: NavItem[] = [
-  { href: "/vagas", icon: "briefcase", label: "Vagas EB-3", match: (p) => p === "/vagas" || p.startsWith("/vagas/") },
-  { href: "/outras-vagas", icon: "world-search", label: "Outras vagas", match: (p) => p.startsWith("/outras-vagas") },
-  { href: "/meu-processo", icon: "route", label: "Meu Processo", match: (p) => p.startsWith("/meu-processo") },
+  { href: "/vagas", icon: "briefcase", labelKey: "jobsEb3", match: (p) => p === "/vagas" || p.startsWith("/vagas/") },
+  { href: "/outras-vagas", icon: "world-search", labelKey: "otherJobs", match: (p) => p.startsWith("/outras-vagas") },
+  { href: "/meu-processo", icon: "route", labelKey: "myProcess", match: (p) => p.startsWith("/meu-processo") },
 ];
 
 const ADMIN_NAV: NavItem[] = [
-  { href: "/admin", icon: "layout-grid", label: "Casos", match: (p) => p === "/admin" || p.startsWith("/admin/casos") },
-  { href: "/admin/candidaturas", icon: "send", label: "Candidaturas", match: (p) => p.startsWith("/admin/candidaturas") },
-  { href: "/admin/vagas", icon: "briefcase", label: "Vagas", match: (p) => p.startsWith("/admin/vagas") },
+  { href: "/admin", icon: "layout-grid", labelKey: "cases", match: (p) => p === "/admin" || p.startsWith("/admin/casos") },
+  { href: "/admin/candidaturas", icon: "send", labelKey: "applications", match: (p) => p.startsWith("/admin/candidaturas") },
+  { href: "/admin/vagas", icon: "briefcase", labelKey: "jobs", match: (p) => p.startsWith("/admin/vagas") },
 ];
 
 export function AppBar({
@@ -33,6 +35,7 @@ export function AppBar({
   image?: string | null;
 }) {
   const pathname = usePathname() ?? "";
+  const t = useTranslations("nav");
   const isAdmin = role === "ADMIN";
   const items = isAdmin ? ADMIN_NAV : CLIENT_NAV;
 
@@ -46,23 +49,24 @@ export function AppBar({
             href={it.href}
             className={"navtab" + (it.match(pathname) ? " is-active" : "")}
           >
-            <Icon n={it.icon} /> {it.label}
+            <Icon n={it.icon} /> {t(it.labelKey)}
           </Link>
         ))}
       </nav>
 
       <div className="appbar__right">
+        <LocaleToggle />
         <div className="userpill">
           <span className="avatar">
             {image ? <img src={image} alt="" /> : initials(name)}
           </span>
           <div>
             <div className="userpill__name">{name}</div>
-            <div className="userpill__role">{isAdmin ? "Kick Start Team" : "Candidato"}</div>
+            <div className="userpill__role">{isAdmin ? t("roleTeam") : t("roleCandidate")}</div>
           </div>
         </div>
         <form action={signOutAction}>
-          <button className="iconbtn-light" title="Sair" type="submit">
+          <button className="iconbtn-light" title={t("logout")} type="submit">
             <Icon n="logout" />
           </button>
         </form>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Icon } from "./Icon";
 import { StatusBadge } from "./Status";
 import type { StatusKey } from "@/lib/status";
@@ -18,16 +19,13 @@ export type AdminCaseRow = {
   updatedLabel: string;
 };
 
-const FILTERS: { k: "all" | StatusKey; label: string }[] = [
-  { k: "all", label: "Todos" },
-  { k: "analysis", label: "Em análise" },
-  { k: "pending", label: "Pendência" },
-  { k: "denied", label: "Negado" },
-  { k: "approved", label: "Aprovado" },
-];
+const FILTER_KEYS: ("all" | StatusKey)[] = ["all", "analysis", "pending", "denied", "approved"];
 
 export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
   const router = useRouter();
+  const t = useTranslations("admin");
+  const ts = useTranslations("status");
+  const filterLabel = (k: "all" | StatusKey) => (k === "all" ? t("filterAll") : ts(k));
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | StatusKey>("all");
 
@@ -45,17 +43,14 @@ export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
           <div className="empty__ic">
             <Icon n="folder-off" />
           </div>
-          <h3>Nenhum caso aberto ainda</h3>
-          <p>
-            As candidaturas recebidas ficam em &quot;Candidaturas&quot;. Abra um caso a partir de uma
-            candidatura para começar a acompanhar o processo do cliente.
-          </p>
+          <h3>{t("noCasesYetTitle")}</h3>
+          <p>{t("noCasesYetText")}</p>
           <div className="welcome__actions" style={{ marginTop: 18 }}>
             <Link className="btn btn--primary" href="/admin/candidaturas">
-              <Icon n="send" /> Ver candidaturas
+              <Icon n="send" /> {t("seeApplications")}
             </Link>
             <Link className="btn btn--ghost" href="/admin/casos/novo">
-              <Icon n="plus" /> Abrir caso manualmente
+              <Icon n="plus" /> {t("openCaseManual")}
             </Link>
           </div>
         </div>
@@ -69,20 +64,20 @@ export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
         <div className="search">
           <Icon n="search" />
           <input
-            placeholder="Buscar por nome, nº do caso ou país…"
+            placeholder={t("searchCases")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
         <div className="chips">
-          {FILTERS.map((f) => (
+          {FILTER_KEYS.map((k) => (
             <button
-              key={f.k}
-              className={"chip" + (filter === f.k ? " is-active" : "")}
-              onClick={() => setFilter(f.k)}
+              key={k}
+              className={"chip" + (filter === k ? " is-active" : "")}
+              onClick={() => setFilter(k)}
             >
-              {f.k !== "all" && <span className={`ico-dot dot--${f.k}`} />}
-              {f.label}
+              {k !== "all" && <span className={`ico-dot dot--${k}`} />}
+              {filterLabel(k)}
             </button>
           ))}
         </div>
@@ -94,8 +89,8 @@ export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
             <div className="empty__ic">
               <Icon n="folder-off" />
             </div>
-            <h3>Nenhum caso encontrado</h3>
-            <p>Ajuste a busca ou os filtros de status para ver mais resultados.</p>
+            <h3>{t("noCasesFoundTitle")}</h3>
+            <p>{t("noCasesFoundText")}</p>
             <button
               className="btn btn--ghost"
               onClick={() => {
@@ -103,7 +98,7 @@ export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
                 setFilter("all");
               }}
             >
-              <Icon n="refresh" /> Limpar filtros
+              <Icon n="refresh" /> {t("clearFilters")}
             </button>
           </div>
         </div>
@@ -112,11 +107,11 @@ export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
           <table className="tbl">
             <thead>
               <tr>
-                <th>Cliente</th>
-                <th>Origem</th>
-                <th>Fase atual</th>
-                <th>Status</th>
-                <th>Atualizado</th>
+                <th>{t("colClient")}</th>
+                <th>{t("colOrigin")}</th>
+                <th>{t("colCurrentPhase")}</th>
+                <th>{t("colStatus")}</th>
+                <th>{t("colUpdated")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -146,7 +141,7 @@ export function AdminCaseList({ cases }: { cases: AdminCaseRow[] }) {
                   <td>{c.updatedLabel}</td>
                   <td style={{ textAlign: "right" }}>
                     <span className="editlink">
-                      Abrir <Icon n="arrow-right" />
+                      {t("open")} <Icon n="arrow-right" />
                     </span>
                   </td>
                 </tr>

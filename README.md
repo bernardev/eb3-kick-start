@@ -161,6 +161,17 @@ Sem mexer no WordPress, escolha uma das opções:
 
 ---
 
+## Idiomas (PT-BR / EN)
+
+A interface é **100% bilíngue** (português e inglês) via **next-intl**. O usuário
+troca o idioma pelo seletor **PT/EN** no header (ou no card de login); a escolha
+fica salva em cookie — **sem mudar as URLs**. O Formulário G1 e o **PDF gerado**
+também acompanham o idioma escolhido.
+
+> Os textos da interface ficam em `messages/pt.json` e `messages/en.json`.
+> Conteúdo cadastrado pela equipe (título/descrição de vaga, notas, nomes de
+> fase) aparece no idioma em que foi digitado — isso é dado, não interface.
+
 ## Decisões de produto (em relação ao protótipo)
 
 - A palavra **"garantido" não é usada em lugar nenhum** (decisão da cliente).

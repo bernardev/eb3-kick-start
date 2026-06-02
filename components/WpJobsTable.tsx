@@ -1,17 +1,19 @@
+import { getTranslations } from "next-intl/server";
 import { Icon } from "./Icon";
 import type { WpJob } from "@/lib/wp-jobs";
 
 // Tabela das vagas do site (board do WordPress). Cada linha leva à vaga
 // no kick-start.us. Apenas a tabela — o cabeçalho fica na página.
-export function WpJobsTable({ jobs }: { jobs: WpJob[] }) {
+export async function WpJobsTable({ jobs }: { jobs: WpJob[] }) {
+  const t = await getTranslations("otherJobs");
   return (
     <div className="tablewrap">
       <table className="tbl">
         <thead>
           <tr>
-            <th>Posição</th>
-            <th>Localização</th>
-            <th>Categoria</th>
+            <th>{t("colPosition")}</th>
+            <th>{t("colLocation")}</th>
+            <th>{t("colCategory")}</th>
             <th></th>
           </tr>
         </thead>
@@ -41,7 +43,7 @@ export function WpJobsTable({ jobs }: { jobs: WpJob[] }) {
               </td>
               <td style={{ textAlign: "right" }}>
                 <a className="editlink" href={j.link} target="_blank" rel="noopener noreferrer">
-                  Ver no site <Icon n="external-link" />
+                  {t("seeOnSite")} <Icon n="external-link" />
                 </a>
               </td>
             </tr>

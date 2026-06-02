@@ -1,3 +1,4 @@
+import { getLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { renderG1Pdf } from "@/lib/g1-pdf";
@@ -37,6 +38,7 @@ export async function GET(
     app.user.name ||
     "candidato";
 
+  const lang = (await getLocale()) === "en" ? "en" : "pt";
   const pdf = await renderG1Pdf(data, {
     jobTitle: app.job.title,
     jobEmployer: app.job.employer,
@@ -44,6 +46,7 @@ export async function GET(
     applicantName: name,
     applicantEmail: data.additional?.email || app.user.email || "—",
     submittedAt: app.createdAt,
+    lang,
   });
 
   return new Response(new Uint8Array(pdf), {

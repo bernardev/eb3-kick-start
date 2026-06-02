@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Icon } from "./Icon";
 
 type Job = {
@@ -20,6 +21,7 @@ type Job = {
 type Filter = "all" | "unskilled" | "skilled";
 
 export function JobsList({ jobs }: { jobs: Job[] }) {
+  const t = useTranslations("jobs");
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -39,14 +41,11 @@ export function JobsList({ jobs }: { jobs: Job[] }) {
           <Icon n="discount-check" />
         </div>
         <div>
-          <h3>Vagas exclusivas EB-3</h3>
-          <p>
-            Todas as posições abaixo oferecem patrocínio de visto permanente. Vagas comuns ficam em
-            uma área separada.
-          </p>
+          <h3>{t("introTitle")}</h3>
+          <p>{t("introText")}</p>
         </div>
         <span className="badge badge--approved">
-          <Icon n="shield-check" /> Patrocínio de visto EB-3
+          <Icon n="shield-check" /> {t("introBadge")}
         </span>
       </div>
 
@@ -54,20 +53,20 @@ export function JobsList({ jobs }: { jobs: Job[] }) {
         <div className="search">
           <Icon n="search" />
           <input
-            placeholder="Buscar por cargo, empresa ou cidade…"
+            placeholder={t("searchPlaceholder")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
         <div className="chips">
           <button className={"chip" + (filter === "all" ? " is-active" : "")} onClick={() => setFilter("all")}>
-            Todas
+            {t("filterAll")}
           </button>
           <button className={"chip" + (filter === "unskilled" ? " is-active" : "")} onClick={() => setFilter("unskilled")}>
-            Unskilled
+            {t("filterUnskilled")}
           </button>
           <button className={"chip" + (filter === "skilled" ? " is-active" : "")} onClick={() => setFilter("skilled")}>
-            Skilled
+            {t("filterSkilled")}
           </button>
         </div>
       </div>
@@ -78,8 +77,8 @@ export function JobsList({ jobs }: { jobs: Job[] }) {
             <div className="empty__ic">
               <Icon n="briefcase-off" />
             </div>
-            <h3>Nenhuma vaga encontrada</h3>
-            <p>Tente ajustar a busca ou os filtros. Novas vagas EB-3 são adicionadas toda semana.</p>
+            <h3>{t("emptyTitle")}</h3>
+            <p>{t("emptyText")}</p>
             <button
               className="btn btn--ghost"
               onClick={() => {
@@ -87,7 +86,7 @@ export function JobsList({ jobs }: { jobs: Job[] }) {
                 setFilter("all");
               }}
             >
-              <Icon n="refresh" /> Limpar filtros
+              <Icon n="refresh" /> {t("clearFilters")}
             </button>
           </div>
         </div>
@@ -118,10 +117,11 @@ export function JobsList({ jobs }: { jobs: Job[] }) {
               </div>
               <div className="jobcard__foot">
                 <span className="jobcard__date">
-                  <Icon n="calendar" /> {j.postedLabel ?? "Recente"} · {j.openings} vagas
+                  <Icon n="calendar" />{" "}
+                  {t("postedAndOpenings", { posted: j.postedLabel ?? t("recent"), count: j.openings })}
                 </span>
                 <span className="jobcard__go">
-                  Ver detalhes <Icon n="arrow-right" />
+                  {t("seeDetails")} <Icon n="arrow-right" />
                 </span>
               </div>
             </Link>

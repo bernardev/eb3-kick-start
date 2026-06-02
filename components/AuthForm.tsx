@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
 import { GoogleG } from "./GoogleG";
+import { LocaleToggle } from "./LocaleToggle";
 import { PasswordStrength } from "./PasswordStrength";
 import { passwordChecks } from "@/lib/util";
 import {
@@ -16,6 +18,7 @@ import {
 const initial: AuthFormState = {};
 
 export function AuthForm() {
+  const t = useTranslations("auth");
   const [tab, setTab] = useState<"signup" | "login">("signup");
   const isSignup = tab === "signup";
 
@@ -32,20 +35,17 @@ export function AuthForm() {
       <aside className="auth__aside">
         <Logo className="auth__aside-logo" />
         <div className="auth__aside-body">
-          <h2>Seu caminho para o Green Card americano começa aqui.</h2>
-          <p>
-            A Kick Start conecta profissionais a vagas nos EUA com patrocínio de visto EB-3 — e
-            acompanha cada etapa do seu processo, do início à aprovação.
-          </p>
+          <h2>{t("asideTitle")}</h2>
+          <p>{t("asideText")}</p>
           <div className="auth__points">
             <div className="auth__point">
-              <Icon n="briefcase" /> Vagas reais com patrocínio EB-3
+              <Icon n="briefcase" /> {t("point1")}
             </div>
             <div className="auth__point">
-              <Icon n="route" /> Acompanhamento transparente do caso
+              <Icon n="route" /> {t("point2")}
             </div>
             <div className="auth__point">
-              <Icon n="shield-check" /> Equipe dedicada do início ao fim
+              <Icon n="shield-check" /> {t("point3")}
             </div>
           </div>
         </div>
@@ -53,16 +53,15 @@ export function AuthForm() {
 
       <div className="auth__form">
         <div className="authcard">
-          <Logo variant="word" />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Logo variant="word" />
+            <LocaleToggle />
+          </div>
           <span className="freechip">
-            <Icon n="gift" /> Cadastro 100% gratuito
+            <Icon n="gift" /> {t("freeBadge")}
           </span>
-          <h1>{isSignup ? "Crie sua conta" : "Bem-vindo de volta"}</h1>
-          <p className="authcard__sub">
-            {isSignup
-              ? "Sem custo e sem etapa de pagamento. Explore as vagas EB-3 em minutos."
-              : "Acesse sua conta para acompanhar seu processo."}
-          </p>
+          <h1>{isSignup ? t("createTitle") : t("welcomeTitle")}</h1>
+          <p className="authcard__sub">{isSignup ? t("createSub") : t("loginSub")}</p>
 
           <div className="seg">
             <button
@@ -70,23 +69,23 @@ export function AuthForm() {
               className={"seg__btn" + (isSignup ? " is-active" : "")}
               onClick={() => setTab("signup")}
             >
-              Criar conta
+              {t("tabCreate")}
             </button>
             <button
               type="button"
               className={"seg__btn" + (!isSignup ? " is-active" : "")}
               onClick={() => setTab("login")}
             >
-              Entrar
+              {t("tabLogin")}
             </button>
           </div>
 
           <form action={googleSignIn}>
             <button className="gbtn" type="submit">
-              <GoogleG /> Continuar com Google
+              <GoogleG /> {t("google")}
             </button>
           </form>
-          <div className="divider">ou com email</div>
+          <div className="divider">{t("orEmail")}</div>
 
           {state.error && (
             <div className="formmsg formmsg--error">
@@ -94,24 +93,24 @@ export function AuthForm() {
             </div>
           )}
 
-          {/* form de cadastro */}
+          {/* cadastro */}
           <form action={signupAction} style={{ display: isSignup ? "block" : "none" }}>
             <div className="field">
-              <label className="field__label">Nome completo</label>
+              <label className="field__label">{t("fullName")}</label>
               <div className="inputwrap">
                 <Icon n="user" />
-                <input className="input input--icon" name="name" placeholder="Seu Nome" />
+                <input className="input input--icon" name="name" placeholder={t("namePlaceholder")} />
               </div>
             </div>
             <div className="field">
-              <label className="field__label">Email</label>
+              <label className="field__label">{t("email")}</label>
               <div className="inputwrap">
                 <Icon n="mail" />
                 <input className="input input--icon" type="email" name="email" placeholder="voce@email.com" />
               </div>
             </div>
             <div className="field">
-              <label className="field__label">Senha</label>
+              <label className="field__label">{t("password")}</label>
               <div className="inputwrap">
                 <Icon n="lock" />
                 <input
@@ -131,35 +130,37 @@ export function AuthForm() {
               disabled={pending || !pwStrong}
               style={{ marginTop: 6 }}
             >
-              {pending ? "Criando…" : "Criar conta gratuita"} <Icon n="arrow-right" />
+              {pending ? t("creating") : t("createBtn")} <Icon n="arrow-right" />
             </button>
             <p className="legal">
-              Ao criar uma conta, você concorda com os <a href="#">Termos de Uso</a> e a{" "}
-              <a href="#">Política de Privacidade</a>.
+              {t.rich("terms", {
+                terms: (c) => <a href="#">{c}</a>,
+                privacy: (c) => <a href="#">{c}</a>,
+              })}
             </p>
           </form>
 
-          {/* form de login */}
+          {/* login */}
           <form action={loginAction} style={{ display: isSignup ? "none" : "block" }}>
             <div className="field">
-              <label className="field__label">Email</label>
+              <label className="field__label">{t("email")}</label>
               <div className="inputwrap">
                 <Icon n="mail" />
                 <input className="input input--icon" type="email" name="email" placeholder="voce@email.com" />
               </div>
             </div>
             <div className="field">
-              <label className="field__label">Senha</label>
+              <label className="field__label">{t("password")}</label>
               <div className="inputwrap">
                 <Icon n="lock" />
                 <input className="input input--icon" type="password" name="password" placeholder="••••••••" />
               </div>
             </div>
             <button className="btn btn--primary btn--block btn--lg" type="submit" disabled={pending} style={{ marginTop: 6 }}>
-              {pending ? "Entrando…" : "Entrar"} <Icon n="arrow-right" />
+              {pending ? t("loggingIn") : t("loginBtn")} <Icon n="arrow-right" />
             </button>
             <p className="legal">
-              <a href="#">Esqueceu sua senha?</a>
+              <a href="#">{t("forgot")}</a>
             </p>
           </form>
         </div>

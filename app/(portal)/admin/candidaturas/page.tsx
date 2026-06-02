@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
@@ -7,13 +8,13 @@ import { createCase } from "@/lib/actions/cases";
 
 export const dynamic = "force-dynamic";
 
-function fmtDateTime(d: Date) {
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(d);
-}
-
 // Lista de candidaturas recebidas (todas as aplicações às vagas EB-3).
 export default async function CandidaturasPage() {
   await requireAdmin();
+  const t = await getTranslations("admin");
+  const locale = await getLocale();
+  const fmtDateTime = (d: Date) =>
+    new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(d);
 
   const applications = await prisma.application.findMany({
     orderBy: { createdAt: "desc" },
@@ -27,9 +28,9 @@ export default async function CandidaturasPage() {
     <div className="container container--wide">
       <div className="pagehead">
         <div>
-          <div className="kicker">Painel da equipe</div>
-          <h1>Candidaturas recebidas</h1>
-          <p>Respostas enviadas pelos clientes no fluxo &quot;Aplique aqui&quot;.</p>
+          <div className="kicker">{t("panelKicker")}</div>
+          <h1>{t("candidaturasTitle")}</h1>
+          <p>{t("candidaturasSubtitle")}</p>
         </div>
       </div>
 
@@ -39,8 +40,8 @@ export default async function CandidaturasPage() {
             <div className="empty__ic">
               <Icon n="send" />
             </div>
-            <h3>Nenhuma candidatura ainda</h3>
-            <p>Quando um cliente aplicar a uma vaga, as respostas aparecem aqui.</p>
+            <h3>{t("noCandidaturasTitle")}</h3>
+            <p>{t("noCandidaturasText")}</p>
           </div>
         </div>
       ) : (
@@ -55,7 +56,7 @@ export default async function CandidaturasPage() {
                   </h3>
                   <div className="casemeta" style={{ marginTop: 0 }}>
                     <span>
-                      <Icon n="user" /> <b>{app.user.name ?? "Cliente"}</b> · {app.user.email}
+                      <Icon n="user" /> <b>{app.user.name ?? "—"}</b> · {app.user.email}
                     </span>
                     {app.user.country && (
                       <span>
@@ -66,18 +67,18 @@ export default async function CandidaturasPage() {
                       <Icon n="calendar-event" /> {fmtDateTime(app.createdAt)}
                     </span>
                     <span>
-                      <Icon n="discount-check" /> Consentimento: <b>aceito</b>
+                      <Icon n="discount-check" /> {t("consentAccepted")}
                       {app.consentIp ? ` · IP ${app.consentIp}` : ""}
                     </span>
                     <span>
-                      <Icon n={app.emailSentAt ? "mail-check" : "mail-x"} /> E-mail:{" "}
-                      <b>{app.emailSentAt ? "enviado" : "não enviado"}</b>
+                      <Icon n={app.emailSentAt ? "mail-check" : "mail-x"} />{" "}
+                      {app.emailSentAt ? t("emailSent") : t("emailNotSent")}
                     </span>
                   </div>
                 </div>
                 {hasCase ? (
                   <Link className="btn btn--ghost btn--sm" href={`/admin/casos/${app.user.case!.id}`}>
-                    <Icon n="arrow-right" /> Ver caso
+                    <Icon n="arrow-right" /> {t("seeCase")}
                   </Link>
                 ) : (
                   <form action={createCase}>
@@ -85,7 +86,7 @@ export default async function CandidaturasPage() {
                     <input type="hidden" name="jobLabel" value={`${app.job.title} · ${app.job.employer}`} />
                     <input type="hidden" name="country" value={app.user.country ?? ""} />
                     <button className="btn btn--primary btn--sm" type="submit">
-                      <Icon n="plus" /> Abrir caso
+                      <Icon n="plus" /> {t("openCaseShort")}
                     </button>
                   </form>
                 )}

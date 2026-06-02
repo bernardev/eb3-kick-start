@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { getLocale } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { sendApplicationEmail, sendG1Email } from "@/lib/email";
@@ -149,6 +150,7 @@ export async function submitG1(input: {
 
   // Gera PDF + envia e-mail com anexo. Se falhar, a aplicação já está salva.
   try {
+    const lang = (await getLocale()) === "en" ? "en" : "pt";
     const pdf = await renderG1Pdf(d, {
       jobTitle: job.title,
       jobEmployer: job.employer,
@@ -156,6 +158,7 @@ export async function submitG1(input: {
       applicantName,
       applicantEmail: d.additional.email || dbUser?.email || "—",
       submittedAt: now,
+      lang,
     });
 
     const summary = [

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Timeline } from "./Timeline";
 import { PhaseCard } from "./PhaseCard";
 import { STATUS_KEY, derivePhaseStatus, type StatusKey } from "@/lib/status";
@@ -17,6 +18,7 @@ export function ProcessView({
   editable?: boolean;
   initialOpen?: string[];
 }) {
+  const t = useTranslations("portal");
   const [openIds, setOpenIds] = useState<string[]>(initialOpen);
   const toggle = (id: string) =>
     setOpenIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
@@ -39,8 +41,8 @@ export function ProcessView({
       <div className="card progresscard">
         <div className="progress__top">
           <div>
-            <div className="kicker">Progresso geral</div>
-            <div className="lead">Etapa atual: {current?.phase.title ?? "—"}</div>
+            <div className="kicker">{t("progress")}</div>
+            <div className="lead">{t("currentStep", { phase: current?.phase.title ?? "—" })}</div>
           </div>
           <div className="pct">
             {pct}
@@ -54,7 +56,7 @@ export function ProcessView({
       </div>
 
       <div className="kicker" style={{ margin: "6px 0 12px" }}>
-        Fases do processo
+        {t("phasesTitle")}
       </div>
       <div className="phases">
         {derived.map((d, i) => (

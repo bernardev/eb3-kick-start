@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
@@ -14,6 +15,8 @@ export default async function NovoCasoPage({
 }) {
   await requireAdmin();
   const { userId } = await searchParams;
+  const t = await getTranslations("admin");
+  const tn = await getTranslations("nav");
 
   // Clientes sem caso aberto (elegíveis).
   const clients = await prisma.user.findMany({
@@ -25,13 +28,13 @@ export default async function NovoCasoPage({
   return (
     <div className="container container--wide">
       <div className="crumbs">
-        <Link href="/admin">Casos</Link> <Icon n="chevron-right" /> <span>Novo caso</span>
+        <Link href="/admin">{tn("cases")}</Link> <Icon n="chevron-right" /> <span>{t("newCase")}</span>
       </div>
       <div className="pagehead">
         <div>
-          <div className="kicker">Painel da equipe</div>
-          <h1>Abrir novo caso</h1>
-          <p>Vincule um cliente para começar a acompanhar o processo EB-3 dele.</p>
+          <div className="kicker">{t("panelKicker")}</div>
+          <h1>{t("newCaseTitle")}</h1>
+          <p>{t("newCaseSubtitle")}</p>
         </div>
       </div>
 
@@ -41,24 +44,24 @@ export default async function NovoCasoPage({
             <div className="empty__ic">
               <Icon n="users" />
             </div>
-            <h3>Nenhum cliente disponível</h3>
-            <p>Todos os clientes já têm caso aberto, ou ainda não há clientes cadastrados.</p>
+            <h3>{t("noClientsTitle")}</h3>
+            <p>{t("noClientsText")}</p>
           </div>
         </div>
       ) : (
         <form action={createCase}>
           <div className="card formcard">
-            <h3>Dados do caso</h3>
+            <h3>{t("caseData")}</h3>
             <div className="field">
-              <label className="field__label">Cliente</label>
+              <label className="field__label">{t("client")}</label>
               <div className="select">
                 <select name="userId" defaultValue={userId ?? ""} required>
                   <option value="" disabled>
-                    Selecione um cliente…
+                    {t("selectClient")}
                   </option>
                   {clients.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name ?? "Sem nome"} — {c.email}
+                      {c.name ?? "—"} — {c.email}
                     </option>
                   ))}
                 </select>
@@ -68,19 +71,19 @@ export default async function NovoCasoPage({
 
             <div className="formgrid">
               <div className="field">
-                <label className="field__label">Nº do caso (opcional)</label>
-                <input className="input" name="caseNo" placeholder="Gerado automaticamente (KS-2026-####)" />
+                <label className="field__label">{t("caseNo")}</label>
+                <input className="input" name="caseNo" placeholder={t("caseNoPlaceholder")} />
               </div>
               <div className="field">
-                <label className="field__label">Origem / país (opcional)</label>
+                <label className="field__label">{t("countryOpt")}</label>
                 <input className="input" name="country" placeholder="Brasil" />
               </div>
               <div className="field">
-                <label className="field__label">Case manager (opcional)</label>
+                <label className="field__label">{t("managerOpt")}</label>
                 <input className="input" name="manager" placeholder="Daia" />
               </div>
               <div className="field">
-                <label className="field__label">Vaga vinculada (opcional)</label>
+                <label className="field__label">{t("linkedJobOpt")}</label>
                 <input className="input" name="jobLabel" placeholder="Auxiliar de Cozinha · Blue Ridge Hospitality" />
               </div>
             </div>
@@ -88,10 +91,10 @@ export default async function NovoCasoPage({
 
           <div className="formactions">
             <button className="btn btn--primary btn--lg" type="submit">
-              <Icon n="plus" /> Abrir caso
+              <Icon n="plus" /> {t("openCase")}
             </button>
             <Link className="btn btn--ghost" href="/admin">
-              Cancelar
+              {t("cancel")}
             </Link>
           </div>
         </form>

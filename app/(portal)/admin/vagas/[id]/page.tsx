@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
@@ -15,6 +16,8 @@ export default async function EditarVagaPage({
 }) {
   await requireAdmin();
   const { id } = await params;
+  const t = await getTranslations("admin");
+  const tn = await getTranslations("nav");
 
   const job = await prisma.eb3Job.findUnique({
     where: { id },
@@ -47,12 +50,12 @@ export default async function EditarVagaPage({
   return (
     <div className="container container--wide">
       <div className="crumbs">
-        <Link href="/admin/vagas">Vagas</Link> <Icon n="chevron-right" /> <span>{job.title}</span>
+        <Link href="/admin/vagas">{tn("jobs")}</Link> <Icon n="chevron-right" /> <span>{job.title}</span>
       </div>
       <div className="pagehead">
         <div>
-          <div className="kicker">Painel da equipe</div>
-          <h1>Editar vaga</h1>
+          <div className="kicker">{t("panelKicker")}</div>
+          <h1>{t("editJobTitle")}</h1>
           <p>
             {job.employer} · {job.visa}
           </p>

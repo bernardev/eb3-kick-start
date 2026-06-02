@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { deriveCaseSummary, type StatusKey } from "@/lib/status";
@@ -8,13 +9,18 @@ import { AdminCaseList, type AdminCaseRow } from "@/components/AdminCaseList";
 
 export const dynamic = "force-dynamic";
 
-function fmtDate(d: Date) {
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).format(d);
-}
-
 // Painel da equipe — listagem e gestão de casos EB-3.
 export default async function AdminPage() {
   await requireAdmin();
+  const t = await getTranslations("admin");
+  const ts = await getTranslations("status");
+  const locale = await getLocale();
+  const fmtDate = (d: Date) =>
+    new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d);
 
   const cases = await prisma.case.findMany({
     orderBy: { updatedAt: "desc" },
@@ -47,42 +53,42 @@ export default async function AdminPage() {
     <div className="container container--wide">
       <div className="pagehead">
         <div>
-          <div className="kicker">Painel da equipe</div>
-          <h1>Gestão de casos EB-3</h1>
-          <p>Acompanhe e atualize o andamento de cada cliente.</p>
+          <div className="kicker">{t("panelKicker")}</div>
+          <h1>{t("casesTitle")}</h1>
+          <p>{t("casesSubtitle")}</p>
         </div>
         <Link className="btn btn--primary" href="/admin/casos/novo">
-          <Icon n="plus" /> Novo caso
+          <Icon n="plus" /> {t("newCase")}
         </Link>
       </div>
 
       <div className="statline">
         <div className="stat">
           <div className="stat__n">{rows.length}</div>
-          <div className="stat__l">Casos ativos</div>
+          <div className="stat__l">{t("statActive")}</div>
         </div>
         <div className="stat">
           <div className="stat__n">{count("analysis")}</div>
           <div className="stat__l">
-            <span className="dot dot--analysis" /> Em análise
+            <span className="dot dot--analysis" /> {ts("analysis")}
           </div>
         </div>
         <div className="stat">
           <div className="stat__n">{count("pending")}</div>
           <div className="stat__l">
-            <span className="dot dot--pending" /> Pendência
+            <span className="dot dot--pending" /> {ts("pending")}
           </div>
         </div>
         <div className="stat">
           <div className="stat__n">{count("denied")}</div>
           <div className="stat__l">
-            <span className="dot dot--denied" /> Negado
+            <span className="dot dot--denied" /> {ts("denied")}
           </div>
         </div>
         <div className="stat">
           <div className="stat__n">{count("approved")}</div>
           <div className="stat__l">
-            <span className="dot dot--approved" /> Aprovado
+            <span className="dot dot--approved" /> {ts("approved")}
           </div>
         </div>
       </div>

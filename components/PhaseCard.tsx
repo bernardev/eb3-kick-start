@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Icon } from "./Icon";
 import { StatusBadge, StatusDot } from "./Status";
@@ -27,6 +28,8 @@ export function PhaseCard({
   onToggle: () => void;
 }) {
   const router = useRouter();
+  const t = useTranslations("portal");
+  const ts = useTranslations("status");
   const [notes, setNotes] = useState(phase.notes);
   const [flash, setFlash] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -54,9 +57,7 @@ export function PhaseCard({
           <Icon n={phase.icon} />
         </div>
         <div className="phase__tw">
-          <div className="phase__step-of">
-            Fase {index} de {total}
-          </div>
+          <div className="phase__step-of">{t("phaseOf", { index, total })}</div>
           <div className="phase__title">{phase.title}</div>
           {phase.subtitle && <div className="phase__sub">{phase.subtitle}</div>}
         </div>
@@ -84,7 +85,7 @@ export function PhaseCard({
                   >
                     {STATUS_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
-                        {o.label}
+                        {ts(STATUS_KEY[o.value])}
                       </option>
                     ))}
                   </select>
@@ -99,22 +100,22 @@ export function PhaseCard({
 
         <div className="notes">
           <div className="notes__label">
-            <Icon n="message-2" /> Notas da equipe
+            <Icon n="message-2" /> {t("teamNotes")}
           </div>
           {editable ? (
             <>
               <textarea
                 className="notes__ta"
                 value={notes}
-                placeholder="Escreva uma atualização clara para o cliente sobre esta fase…"
+                placeholder={t("notesPlaceholder")}
                 onChange={(e) => setNotes(e.target.value)}
               />
               <div className="notes__actions">
                 <button className="btn btn--primary btn--sm" onClick={saveNotes} disabled={pending}>
-                  <Icon n="device-floppy" /> Salvar notas
+                  <Icon n="device-floppy" /> {t("saveNotes")}
                 </button>
                 <span className={"saved-flash" + (flash ? " show" : "")}>
-                  <Icon n="check" /> Notas salvas
+                  <Icon n="check" /> {t("notesSaved")}
                 </span>
               </div>
             </>
@@ -122,13 +123,11 @@ export function PhaseCard({
             <>
               <div className="notes__box">{phase.notes}</div>
               <div className="notes__by">
-                <span className="avatar">DA</span> Daia · Kick Start Team
+                <span className="avatar">KS</span> Kick Start Team
               </div>
             </>
           ) : (
-            <div className="notes__box is-empty">
-              Nenhuma nota da equipe nesta fase ainda. Você será avisado quando houver novidades.
-            </div>
+            <div className="notes__box is-empty">{t("noNotes")}</div>
           )}
         </div>
       </div>

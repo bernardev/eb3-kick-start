@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/Logo";
 import { AppBar } from "@/components/AppBar";
 import { requireUser } from "@/lib/guards";
@@ -9,6 +10,7 @@ export default async function PortalLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser();
+  const t = await getTranslations("footer");
 
   return (
     <div className="app">
@@ -20,13 +22,13 @@ export default async function PortalLayout({
             <div className="footer__in">
               <Logo className="footer__logo" />
               <div className="footer__links">
-                <a href="#">Termos de Uso</a>
-                <a href="#">Privacidade</a>
+                <a href="#">{t("terms")}</a>
+                <a href="#">{t("privacy")}</a>
                 <a href="https://kick-start.us" target="_blank" rel="noopener noreferrer">
                   kick-start.us
                 </a>
               </div>
-              <div className="footer__copy">© 2026 Kick Start · Patrocínio de visto EB-3</div>
+              <div className="footer__copy">{t("copy")}</div>
             </div>
           </footer>
         </main>

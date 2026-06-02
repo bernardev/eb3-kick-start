@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
@@ -19,18 +20,21 @@ export default async function AplicarPage({
   const job = await prisma.eb3Job.findFirst({ where: { id, published: true } });
   if (!job) notFound();
 
+  const t = await getTranslations("apply");
+  const td = await getTranslations("jobDetail");
+
   return (
     <div className="container container--wide">
       <div className="crumbs">
-        <Link href="/vagas">Vagas EB-3</Link> <Icon n="chevron-right" />{" "}
+        <Link href="/vagas">{td("breadcrumb")}</Link> <Icon n="chevron-right" />{" "}
         <Link href={`/vagas/${job.id}`}>{job.title}</Link> <Icon n="chevron-right" />{" "}
-        <span>Aplicar</span>
+        <span>{t("crumbApply")}</span>
       </div>
 
       <div className="pagehead">
         <div>
-          <div className="kicker">Aplicação EB-3 · G1 Form</div>
-          <h1>Aplique para {job.title}</h1>
+          <div className="kicker">{t("kicker")}</div>
+          <h1>{t("title", { job: job.title })}</h1>
           <p>
             {job.employer} · {job.visa}
           </p>

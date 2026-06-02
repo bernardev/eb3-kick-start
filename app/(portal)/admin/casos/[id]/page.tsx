@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
@@ -9,10 +10,6 @@ import type { UiPhase } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-function fmtDateTime(d: Date) {
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(d);
-}
-
 // Editor de caso (equipe): status das fases/sub-etapas + notas + respostas.
 export default async function CaseEditPage({
   params,
@@ -21,6 +18,12 @@ export default async function CaseEditPage({
 }) {
   await requireAdmin();
   const { id } = await params;
+  const t = await getTranslations("admin");
+  const tn = await getTranslations("nav");
+  const tp = await getTranslations("portal");
+  const locale = await getLocale();
+  const fmtDateTime = (d: Date) =>
+    new Intl.DateTimeFormat(locale === "en" ? "en-US" : "pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(d);
 
   const eb3case = await prisma.case.findUnique({
     where: { id },
@@ -56,12 +59,11 @@ export default async function CaseEditPage({
   return (
     <div className="container container--wide">
       <div className="crumbs">
-        <Link href="/admin">Casos</Link> <Icon n="chevron-right" /> <span>{eb3case.user.name}</span>
+        <Link href="/admin">{tn("cases")}</Link> <Icon n="chevron-right" /> <span>{eb3case.user.name}</span>
       </div>
 
       <div className="admin-banner">
-        <Icon n="pencil" /> Modo de edição — alterações de status e notas ficam visíveis para o
-        cliente.
+        <Icon n="pencil" /> {t("editBanner")}
       </div>
 
       <div className="casehead">
@@ -75,17 +77,17 @@ export default async function CaseEditPage({
           <div className="casemeta">
             {eb3case.jobLabel && (
               <span>
-                <Icon n="briefcase" /> Vaga: <b>{eb3case.jobLabel}</b>
+                <Icon n="briefcase" /> {t("caseJob")} <b>{eb3case.jobLabel}</b>
               </span>
             )}
             {eb3case.country && (
               <span>
-                <Icon n="flag" /> Origem: <b>{eb3case.country}</b>
+                <Icon n="flag" /> {tp("origin")} <b>{eb3case.country}</b>
               </span>
             )}
             {eb3case.manager && (
               <span>
-                <Icon n="user-shield" /> Manager: <b>{eb3case.manager}</b>
+                <Icon n="user-shield" /> {t("caseManager")} <b>{eb3case.manager}</b>
               </span>
             )}
             <span>
@@ -99,7 +101,7 @@ export default async function CaseEditPage({
 
       {/* Aplicações enviadas por este cliente */}
       <div className="kicker" style={{ margin: "30px 0 12px" }}>
-        Aplicações enviadas ({applications.length})
+        {t("applicationsSent", { count: applications.length })}
       </div>
       {applications.length === 0 ? (
         <div className="card">
@@ -107,8 +109,8 @@ export default async function CaseEditPage({
             <div className="empty__ic">
               <Icon n="send" />
             </div>
-            <h3>Nenhuma aplicação ainda</h3>
-            <p>Quando o cliente aplicar a uma vaga, as respostas aparecem aqui.</p>
+            <h3>{t("noApplicationsTitle")}</h3>
+            <p>{t("noApplicationsText")}</p>
           </div>
         </div>
       ) : (
@@ -123,12 +125,12 @@ export default async function CaseEditPage({
                   <Icon n="calendar-event" /> {fmtDateTime(app.createdAt)}
                 </span>
                 <span>
-                  <Icon n="discount-check" /> Consentimento: <b>aceito</b>
+                  <Icon n="discount-check" /> {t("consentAccepted")}
                   {app.consentIp ? ` · IP ${app.consentIp}` : ""}
                 </span>
                 <span>
-                  <Icon n={app.emailSentAt ? "mail-check" : "mail-x"} /> E-mail:{" "}
-                  <b>{app.emailSentAt ? "enviado" : "não enviado"}</b>
+                  <Icon n={app.emailSentAt ? "mail-check" : "mail-x"} />{" "}
+                  {app.emailSentAt ? t("emailSent") : t("emailNotSent")}
                 </span>
               </div>
               <AnswersBlock appId={app.id} answers={app.answers} />
