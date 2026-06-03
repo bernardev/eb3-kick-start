@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
 import { ProcessView } from "@/components/ProcessView";
+import { telegramLink } from "@/lib/support";
 import type { UiPhase } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -90,8 +91,8 @@ export default async function MeuProcessoPage() {
             )}
           </div>
         </div>
-        <a className="btn btn--ghost" href="mailto:info@kick-start.us">
-          <Icon n="headset" /> {t("talkToTeam")}
+        <a className="btn btn--ghost" href={telegramLink()} target="_blank" rel="noopener noreferrer">
+          <Icon n="brand-telegram" /> {t("talkToTeam")}
         </a>
       </div>
 
