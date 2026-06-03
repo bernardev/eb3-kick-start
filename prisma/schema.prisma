@@ -96,7 +96,9 @@ model Application {
   consentText     String // texto exato do aviso aceito
   consentAt       DateTime // data/hora do aceite
   consentIp       String? // IP de origem do aceite (prova adicional)
-  emailSentAt     DateTime? // quando o e-mail para info@kick-start.us foi enviado
+  emailSentAt     DateTime? // quando o e-mail para info@kick-start.us foi enviado/aceito
+  emailMessageId  String? // ID retornado pelo servidor SMTP (rastreio)
+  emailError      String? // mensagem de erro, se o envio falhou
   createdAt       DateTime @default(now())
 
   @@index([userId])

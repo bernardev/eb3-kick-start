@@ -14,7 +14,10 @@ type Mail = {
   attachments?: { filename: string; content: Buffer }[];
 };
 
-async function deliver(msg: Mail) {
+// Resultado do envio (para rastreio).
+export type DeliverResult = { via: "smtp" | "resend"; id: string; accepted?: string[]; response?: string };
+
+async function deliver(msg: Mail): Promise<DeliverResult> {
   const host = process.env.SMTP_HOST;
   if (host) {
     const port = Number(process.env.SMTP_PORT ?? 465);
@@ -24,7 +27,7 @@ async function deliver(msg: Mail) {
       secure: port === 465, // 465 = SSL; 587 = STARTTLS
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     });
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: msg.from,
       to: msg.to,
       replyTo: msg.replyTo,
@@ -33,13 +36,18 @@ async function deliver(msg: Mail) {
       text: msg.text,
       attachments: msg.attachments,
     });
-    return;
+    return {
+      via: "smtp",
+      id: info.messageId ?? "",
+      accepted: (info.accepted ?? []).map(String),
+      response: info.response,
+    };
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   if (apiKey) {
     const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: msg.from,
       to: msg.to,
       replyTo: msg.replyTo,
@@ -49,7 +57,7 @@ async function deliver(msg: Mail) {
       attachments: msg.attachments?.map((a) => ({ filename: a.filename, content: a.content })),
     });
     if (error) throw new Error(`Falha ao enviar e-mail (Resend): ${error.message}`);
-    return;
+    return { via: "resend", id: data?.id ?? "" };
   }
 
   throw new Error(
@@ -238,12 +246,12 @@ function buildG1Html(d: G1EmailData) {
  * para a caixa da equipe (MAIL_TO). Lança erro se o Resend não estiver
  * configurado ou se a API falhar.
  */
-export async function sendG1Email(d: G1EmailData) {
+export async function sendG1Email(d: G1EmailData): Promise<DeliverResult & { to: string }> {
   const from = process.env.MAIL_FROM;
   const to = process.env.MAIL_TO ?? "info@kick-start.us";
   if (!from) throw new Error("E-mail não configurado: defina MAIL_FROM no ambiente.");
 
-  await deliver({
+  const result = await deliver({
     from,
     to,
     replyTo: d.applicantEmail,
@@ -252,6 +260,7 @@ export async function sendG1Email(d: G1EmailData) {
     text: `New G1 application — ${d.jobTitle} — ${d.applicantName}. The complete G1 form is attached as a PDF.`,
     attachments: [{ filename: d.pdfFilename, content: d.pdf }],
   });
+  return { ...result, to };
 }
 
 /**

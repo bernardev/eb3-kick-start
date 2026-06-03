@@ -70,9 +70,13 @@ export default async function CandidaturasPage() {
                       <Icon n="discount-check" /> {t("consentAccepted")}
                       {app.consentIp ? ` · IP ${app.consentIp}` : ""}
                     </span>
-                    <span>
+                    <span title={app.emailMessageId ?? app.emailError ?? ""}>
                       <Icon n={app.emailSentAt ? "mail-check" : "mail-x"} />{" "}
                       {app.emailSentAt ? t("emailSent") : t("emailNotSent")}
+                      {app.emailSentAt && app.emailMessageId
+                        ? ` · ${app.emailMessageId.replace(/[<>]/g, "").slice(0, 28)}`
+                        : ""}
+                      {!app.emailSentAt && app.emailError ? `: ${app.emailError.slice(0, 90)}` : ""}
                     </span>
                   </div>
                 </div>

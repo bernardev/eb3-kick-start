@@ -173,7 +173,7 @@ export async function submitG1(input: {
       { label: "Citizenship", value: d.address.citizenship },
     ];
 
-    await sendG1Email({
+    const result = await sendG1Email({
       jobTitle: job.title,
       jobEmployer: job.employer,
       jobVisa: job.visa,
@@ -189,9 +189,21 @@ export async function submitG1(input: {
       pdfFilename: `G1-${applicantName.replace(/[^a-zA-Z0-9]+/g, "-")}.pdf`,
     });
 
-    await prisma.application.update({ where: { id: application.id }, data: { emailSentAt: new Date() } });
+    // Rastreio: aparece nos logs da Vercel e no painel admin.
+    console.log(
+      `[EB-3] G1 e-mail ENVIADO · app=${application.id} · via=${result.via} · to=${result.to}` +
+        ` · accepted=${(result.accepted ?? []).join(",")} · id=${result.id} · resp=${result.response ?? ""}`,
+    );
+    await prisma.application.update({
+      where: { id: application.id },
+      data: { emailSentAt: new Date(), emailMessageId: result.id || null, emailError: null },
+    });
   } catch (err) {
-    console.error("[EB-3] Falha ao gerar/enviar e-mail do G1:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[EB-3] FALHA ao enviar e-mail do G1 · app=${application.id} · ${msg}`);
+    await prisma.application
+      .update({ where: { id: application.id }, data: { emailError: msg.slice(0, 500) } })
+      .catch(() => {});
   }
 
   return { ok: true };
