@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
+import { SupportCta } from "@/components/SupportCta";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +127,9 @@ export default async function JobDetailPage({
             >
               <Icon n="send" /> {t("applyHere")}
             </Link>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <SupportCta />
           </div>
         </aside>
       </div>

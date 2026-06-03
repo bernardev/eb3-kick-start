@@ -430,6 +430,13 @@ textarea.input { resize: vertical; min-height: 96px; line-height: 1.6; }
 .formmsg--error { background: var(--st-denied-bg); color: var(--st-denied); border: 1px solid var(--st-denied-bd); }
 .formmsg--ok { background: var(--st-approved-bg); color: var(--st-approved); border: 1px solid var(--st-approved-bd); }
 
+/* CTA de atendimento (WhatsApp) */
+.supportcta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  background: var(--brand-tint); border: 1px solid var(--brand-line); border-radius: var(--r-md); padding: 13px 16px; }
+.supportcta span { font-family: var(--font-title); font-weight: 600; font-size: 13.5px; color: var(--ink-2); }
+.btn--wa { background: #25d366; color: #fff; }
+.btn--wa:hover { background: #1ebe5b; transform: translateY(-1px); box-shadow: var(--sh-2); }
+
 /* ---- Formulário G1 (intake) ---- */
 .g1sub { color: var(--ink-3); font-size: 12.5px; margin: -8px 0 16px; }
 .g1card-title { display: flex; align-items: center; gap: 10px; }

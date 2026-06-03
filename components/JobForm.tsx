@@ -8,6 +8,9 @@ import { saveJob, deleteJob } from "@/lib/actions/jobs";
 
 type QuestionDraft = { label: string; helpText: string; type: "TEXT" | "TEXTAREA"; required: boolean };
 
+// Categorias EB-3 disponíveis ao publicar a vaga.
+const VISA_OPTIONS = ["EB-3 · Unskilled", "EB-3 · Skilled", "EB-3 · Professional"];
+
 export type JobFormData = {
   id?: string;
   title: string;
@@ -99,7 +102,17 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
           </div>
           <div className="field">
             <label className="field__label">{t("visa")}</label>
-            <input className="input" value={f.visa} onChange={(e) => set("visa", e.target.value)} placeholder="EB-3 · Unskilled" />
+            <div className="select">
+              <select value={f.visa} onChange={(e) => set("visa", e.target.value)}>
+                {VISA_OPTIONS.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+                {f.visa && !VISA_OPTIONS.includes(f.visa) && <option value={f.visa}>{f.visa}</option>}
+              </select>
+              <Icon n="selector" />
+            </div>
           </div>
           <div className="field">
             <label className="field__label">{t("salary")}</label>

@@ -18,7 +18,12 @@ type Job = {
   postedLabel: string | null;
 };
 
-type Filter = "all" | "unskilled" | "skilled";
+type Filter = "all" | "unskilled" | "skilled" | "professional";
+
+// Extrai a categoria (último termo do visto, ex.: "EB-3 · Skilled" → "skilled").
+function tierOf(visa: string): string {
+  return visa.split("·").pop()?.trim().toLowerCase() ?? visa.toLowerCase();
+}
 
 export function JobsList({ jobs }: { jobs: Job[] }) {
   const t = useTranslations("jobs");
@@ -29,7 +34,7 @@ export function JobsList({ jobs }: { jobs: Job[] }) {
     const matchQ = (j.title + " " + j.employer + " " + j.location)
       .toLowerCase()
       .includes(q.toLowerCase());
-    const matchF = filter === "all" || j.visa.toLowerCase().includes(filter);
+    const matchF = filter === "all" || tierOf(j.visa) === filter;
     return matchQ && matchF;
   });
 
@@ -67,6 +72,9 @@ export function JobsList({ jobs }: { jobs: Job[] }) {
           </button>
           <button className={"chip" + (filter === "skilled" ? " is-active" : "")} onClick={() => setFilter("skilled")}>
             {t("filterSkilled")}
+          </button>
+          <button className={"chip" + (filter === "professional" ? " is-active" : "")} onClick={() => setFilter("professional")}>
+            {t("filterProfessional")}
           </button>
         </div>
       </div>

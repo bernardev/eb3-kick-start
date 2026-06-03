@@ -1,13 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
-import { getLocale } from "next-intl/server";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { sendApplicationEmail, sendG1Email } from "@/lib/email";
 import { CONSENT_CHECKBOX } from "@/lib/consent";
 import { renderG1Pdf } from "@/lib/g1-pdf";
-import { optLabel, MARITAL_OPTIONS, EDUCATION_OPTIONS, type G1Data } from "@/lib/g1";
+import { MARITAL_OPTIONS, EDUCATION_OPTIONS, type G1Data } from "@/lib/g1";
 
 export type ApplyState = { ok?: boolean; error?: string };
 
@@ -149,8 +148,8 @@ export async function submitG1(input: {
   });
 
   // Gera PDF + envia e-mail com anexo. Se falhar, a aplicação já está salva.
+  // IMPORTANTE: o documento enviado à equipe/empresas é SEMPRE em inglês.
   try {
-    const lang = (await getLocale()) === "en" ? "en" : "pt";
     const pdf = await renderG1Pdf(d, {
       jobTitle: job.title,
       jobEmployer: job.employer,
@@ -158,18 +157,20 @@ export async function submitG1(input: {
       applicantName,
       applicantEmail: d.additional.email || dbUser?.email || "—",
       submittedAt: now,
-      lang,
+      lang: "en",
     });
 
+    const enOpt = (options: typeof MARITAL_OPTIONS, value: string) =>
+      options.find((o) => o.value === value)?.en ?? "—";
     const summary = [
-      { label: "Nome / Name", value: applicantName },
-      { label: "Data de nascimento / DOB", value: d.address.dob },
-      { label: "E-mail (G1)", value: d.additional.email },
-      { label: "Telefone / Phone", value: d.address.phone },
-      { label: "Estado civil / Marital", value: optLabel(MARITAL_OPTIONS, d.personal.maritalStatus) },
-      { label: "Educação / Education", value: optLabel(EDUCATION_OPTIONS, d.education.level) },
-      { label: "Empregador atual / Current employer", value: `${d.currentEmployment.employer} ${d.currentEmployment.jobTitle}`.trim() },
-      { label: "Cidadania / Citizenship", value: d.address.citizenship },
+      { label: "Name", value: applicantName },
+      { label: "Date of birth", value: d.address.dob },
+      { label: "Email", value: d.additional.email },
+      { label: "Phone", value: d.address.phone },
+      { label: "Marital status", value: enOpt(MARITAL_OPTIONS, d.personal.maritalStatus) },
+      { label: "Education", value: enOpt(EDUCATION_OPTIONS, d.education.level) },
+      { label: "Current employer", value: `${d.currentEmployment.employer} ${d.currentEmployment.jobTitle}`.trim() },
+      { label: "Citizenship", value: d.address.citizenship },
     ];
 
     await sendG1Email({

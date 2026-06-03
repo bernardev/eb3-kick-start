@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
 import { G1Form } from "@/components/G1Form";
+import { SupportCta } from "@/components/SupportCta";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,10 @@ export default async function AplicarPage({
             {job.employer} · {job.visa}
           </p>
         </div>
+      </div>
+
+      <div style={{ marginBottom: 18 }}>
+        <SupportCta />
       </div>
 
       <G1Form

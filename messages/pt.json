@@ -73,6 +73,7 @@
     "filterAll": "Todas",
     "filterUnskilled": "Unskilled",
     "filterSkilled": "Skilled",
+    "filterProfessional": "Professional",
     "emptyTitle": "Nenhuma vaga encontrada",
     "emptyText": "Tente ajustar a busca ou os filtros. Novas vagas EB-3 são adicionadas toda semana.",
     "clearFilters": "Limpar filtros",
@@ -303,6 +304,11 @@
     "errorTitle": "Não foi possível carregar as vagas do site agora",
     "errorText": "Tente novamente em instantes ou veja todas as vagas direto no kick-start.us.",
     "seeJobsSite": "Ver vagas no site"
+  },
+  "support": {
+    "notReady": "Não está pronto para aplicar?",
+    "talkWhatsapp": "Falar no WhatsApp",
+    "prefill": "Olá! Tenho dúvidas sobre as vagas EB-3 e gostaria de atendimento."
   },
   "common": {
     "yes": "Sim",
