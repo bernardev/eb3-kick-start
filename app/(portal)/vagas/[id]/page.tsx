@@ -128,6 +128,16 @@ export default async function JobDetailPage({
               <Icon n="send" /> {t("applyHere")}
             </Link>
           </div>
+
+          {job.observations && (
+            <div className="obsbox">
+              <div className="obsbox__title">
+                <Icon n="tag" /> {t("observationsTitle")}
+              </div>
+              <div className="obsbox__body">{job.observations}</div>
+            </div>
+          )}
+
           <div style={{ marginTop: 12 }}>
             <SupportCta />
           </div>

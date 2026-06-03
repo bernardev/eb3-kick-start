@@ -94,6 +94,7 @@
     "aboutSponsorship": "Sobre o patrocínio EB-3",
     "sponsorshipText": "Esta posição oferece patrocínio do Green Card pela categoria EB-3. A Kick Start acompanha todas as etapas legais — DOL/PERM, I-140 e I-485/Consular — junto com você.",
     "visaType": "Tipo de visto",
+    "observationsTitle": "Observações",
     "openingsShort": "Vagas",
     "posted": "Publicada",
     "baseSalarySuffix": "· salário base"
@@ -285,6 +286,9 @@
     "descriptionPlaceholder": "Descreva a posição, o empregador e o patrocínio EB-3…",
     "requirements": "Requisitos (um por linha)",
     "publishedLabel": "Publicada (visível para os clientes)",
+    "observations": "Observações",
+    "observationsPlaceholder": "Ex.: valor para aplicar à vaga…",
+    "observationsHint": "Aparece destacada na página da vaga (não vai para o formulário/empresas).",
     "g1Note": "A aplicação desta vaga usa o Formulário G1 (intake completo), igual para todas as vagas EB-3. Não há mais questionário por vaga.",
     "save": "Salvar vaga",
     "saving": "Salvando…",

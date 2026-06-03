@@ -94,6 +94,7 @@
     "aboutSponsorship": "About EB-3 sponsorship",
     "sponsorshipText": "This position offers Green Card sponsorship through the EB-3 category. Kick Start follows every legal step — DOL/PERM, I-140 and I-485/Consular — alongside you.",
     "visaType": "Visa type",
+    "observationsTitle": "Notes",
     "openingsShort": "Openings",
     "posted": "Posted",
     "baseSalarySuffix": "· base salary"
@@ -285,6 +286,9 @@
     "descriptionPlaceholder": "Describe the position, the employer and the EB-3 sponsorship…",
     "requirements": "Requirements (one per line)",
     "publishedLabel": "Published (visible to clients)",
+    "observations": "Notes",
+    "observationsPlaceholder": "E.g., the value to apply for this job…",
+    "observationsHint": "Shown highlighted on the job page (not sent to the form/companies).",
     "g1Note": "This job's application uses the G1 Form (full intake), the same for all EB-3 jobs. There is no per-job questionnaire anymore.",
     "save": "Save job",
     "saving": "Saving…",

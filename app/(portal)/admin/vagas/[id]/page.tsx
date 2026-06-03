@@ -38,6 +38,7 @@ export default async function EditarVagaPage({
     postedLabel: job.postedLabel ?? "",
     description: job.description,
     requirements: job.requirements,
+    observations: job.observations ?? "",
     published: job.published,
     questions: job.questions.map((q) => ({
       label: q.label,
