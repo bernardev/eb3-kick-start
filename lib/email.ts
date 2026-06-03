@@ -1,4 +1,61 @@
 import { Resend } from "resend";
+import nodemailer from "nodemailer";
+
+// Envia um e-mail usando SMTP (ex.: Gmail/Google Workspace, HostGator) se
+// SMTP_HOST estiver definido; senão usa o Resend. Lança erro se nenhum estiver
+// configurado ou se o envio falhar.
+type Mail = {
+  from: string;
+  to: string;
+  replyTo?: string;
+  subject: string;
+  html: string;
+  text?: string;
+  attachments?: { filename: string; content: Buffer }[];
+};
+
+async function deliver(msg: Mail) {
+  const host = process.env.SMTP_HOST;
+  if (host) {
+    const port = Number(process.env.SMTP_PORT ?? 465);
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465, // 465 = SSL; 587 = STARTTLS
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+    await transporter.sendMail({
+      from: msg.from,
+      to: msg.to,
+      replyTo: msg.replyTo,
+      subject: msg.subject,
+      html: msg.html,
+      text: msg.text,
+      attachments: msg.attachments,
+    });
+    return;
+  }
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (apiKey) {
+    const resend = new Resend(apiKey);
+    const { error } = await resend.emails.send({
+      from: msg.from,
+      to: msg.to,
+      replyTo: msg.replyTo,
+      subject: msg.subject,
+      html: msg.html,
+      text: msg.text ?? "",
+      attachments: msg.attachments?.map((a) => ({ filename: a.filename, content: a.content })),
+    });
+    if (error) throw new Error(`Falha ao enviar e-mail (Resend): ${error.message}`);
+    return;
+  }
+
+  throw new Error(
+    "E-mail não configurado: defina SMTP_HOST (+SMTP_USER/SMTP_PASS) ou RESEND_API_KEY, e MAIL_FROM.",
+  );
+}
 
 // Dados necessários para montar o e-mail de uma aplicação EB-3.
 export type ApplicationEmailData = {
@@ -182,23 +239,19 @@ function buildG1Html(d: G1EmailData) {
  * configurado ou se a API falhar.
  */
 export async function sendG1Email(d: G1EmailData) {
-  const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.MAIL_FROM;
   const to = process.env.MAIL_TO ?? "info@kick-start.us";
-  if (!apiKey || !from) {
-    throw new Error("E-mail não configurado: defina RESEND_API_KEY e MAIL_FROM no ambiente.");
-  }
+  if (!from) throw new Error("E-mail não configurado: defina MAIL_FROM no ambiente.");
 
-  const resend = new Resend(apiKey);
-  const { error } = await resend.emails.send({
+  await deliver({
     from,
     to,
     replyTo: d.applicantEmail,
     subject: `New G1 application — ${d.jobTitle} — ${d.applicantName}`,
     html: buildG1Html(d),
+    text: `New G1 application — ${d.jobTitle} — ${d.applicantName}. The complete G1 form is attached as a PDF.`,
     attachments: [{ filename: d.pdfFilename, content: d.pdf }],
   });
-  if (error) throw new Error(`Falha ao enviar e-mail (Resend): ${error.message}`);
 }
 
 /**
