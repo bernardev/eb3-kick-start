@@ -282,9 +282,12 @@ table.tbl tbody tr:hover { background: var(--brand-tint); }
 .applycard__sal { font-family: var(--font-title); font-weight: 700; font-size: 24px; color: var(--ink); }
 .applycard__sal small { font-size: 13px; font-weight: 500; color: var(--ink-3); }
 .applycard hr { border: none; border-top: 1px solid var(--line); margin: 16px 0; }
-.applycard__row { display: flex; align-items: center; justify-content: space-between; font-size: 13.5px; padding: 7px 0; }
-.applycard__row span:first-child { color: var(--ink-3); }
-.applycard__row span:last-child { font-weight: 600; color: var(--ink); font-family: var(--font-title); }
+.applycard__row { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; font-size: 13.5px; padding: 7px 0; }
+.applycard__row span:first-child { color: var(--ink-3); flex-shrink: 0; }
+.applycard__row span:last-child { font-weight: 600; color: var(--ink); font-family: var(--font-title); text-align: right; min-width: 0; overflow-wrap: anywhere; }
+/* valores longos (ex.: endereço completo) empilham: rótulo em cima, valor abaixo */
+.applycard__row--stack { flex-direction: column; align-items: flex-start; gap: 4px; }
+.applycard__row--stack span:last-child { text-align: left; line-height: 1.5; }
 
 /* ============================================================ PORTAL */
 .casehead { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: var(--sec-gap); }

@@ -106,7 +106,7 @@ export default async function JobDetailPage({
               <span>{t("visaType")}</span>
               <span>{job.visa}</span>
             </div>
-            <div className="applycard__row">
+            <div className="applycard__row applycard__row--stack">
               <span>{t("location")}</span>
               <span>{job.location}</span>
             </div>
