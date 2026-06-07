@@ -309,6 +309,25 @@
     "errorText": "Try again shortly or see all jobs directly on kick-start.us.",
     "seeJobsSite": "See jobs on the site"
   },
+  "reset": {
+    "forgotTitle": "Forgot your password?",
+    "forgotSub": "Enter your email and we'll send you a link to reset your password.",
+    "emailLabel": "Email",
+    "send": "Send link",
+    "sending": "Sending…",
+    "sentTitle": "Check your email",
+    "sentMsg": "If an account exists for this email, we've sent a password reset link. It expires in 1 hour.",
+    "backToLogin": "Back to login",
+    "resetTitle": "Create new password",
+    "resetSub": "Set a new password for your account.",
+    "newPassword": "New password",
+    "save": "Save new password",
+    "saving": "Saving…",
+    "successTitle": "Password reset!",
+    "successMsg": "Your password has been updated. You can sign in now.",
+    "goLogin": "Go to login",
+    "missingToken": "Invalid or missing link. Please request a new reset."
+  },
   "support": {
     "notReady": "Not ready to apply?",
     "talkWhatsapp": "Talk on WhatsApp",

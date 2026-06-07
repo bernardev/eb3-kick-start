@@ -263,6 +263,51 @@ export async function sendG1Email(d: G1EmailData): Promise<DeliverResult & { to:
   return { ...result, to };
 }
 
+// ---- E-mails de redefinição de senha (bilíngues) ----
+function resetButton(label: string, link: string) {
+  return `<a href="${esc(link)}" style="display:inline-block;background:${BRAND};color:#fff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-weight:700;font-size:15px;padding:13px 22px;border-radius:9px">${esc(label)}</a>`;
+}
+function shell(inner: string) {
+  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#181b24">
+    <div style="background:${BRAND};color:#fff;padding:18px 22px;border-radius:12px 12px 0 0;font-size:16px;font-weight:700">Kick Start · Portal EB-3</div>
+    <div style="border:1px solid #e7e9f0;border-top:none;border-radius:0 0 12px 12px;padding:24px;font-size:14px;line-height:1.6;color:#374151">${inner}</div>
+  </div>`;
+}
+
+// Envia o link de redefinição de senha (idioma pt/en).
+export async function sendPasswordResetEmail(to: string, link: string, locale: "pt" | "en") {
+  const from = process.env.MAIL_FROM;
+  if (!from) throw new Error("Defina MAIL_FROM no ambiente.");
+  const pt = locale !== "en";
+  const subject = pt ? "Redefinição de senha — Kick Start EB-3" : "Password reset — Kick Start EB-3";
+  const body = pt
+    ? `<p>Recebemos um pedido para redefinir a sua senha.</p>
+       <p>Clique no botão abaixo para criar uma nova senha. O link é válido por <b>1 hora</b>.</p>
+       <p style="margin:22px 0">${resetButton("Redefinir senha", link)}</p>
+       <p style="color:#8a92a4;font-size:12px">Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.</p>`
+    : `<p>We received a request to reset your password.</p>
+       <p>Click the button below to create a new password. The link is valid for <b>1 hour</b>.</p>
+       <p style="margin:22px 0">${resetButton("Reset password", link)}</p>
+       <p style="color:#8a92a4;font-size:12px">If you didn't request this, you can ignore this email — your password stays the same.</p>`;
+  await deliver({ from, to, subject, html: shell(body), text: `${subject}: ${link}` });
+}
+
+// Avisa que a conta usa login com Google (não tem senha pra redefinir).
+export async function sendGoogleAccountNoticeEmail(to: string, loginUrl: string, locale: "pt" | "en") {
+  const from = process.env.MAIL_FROM;
+  if (!from) throw new Error("Defina MAIL_FROM no ambiente.");
+  const pt = locale !== "en";
+  const subject = pt ? "Acesso à sua conta — Kick Start EB-3" : "Accessing your account — Kick Start EB-3";
+  const body = pt
+    ? `<p>Você pediu para redefinir a senha, mas a sua conta entra com <b>"Continuar com Google"</b> — por isso não há senha para redefinir.</p>
+       <p style="margin:22px 0">${resetButton("Ir para o login", loginUrl)}</p>
+       <p style="color:#8a92a4;font-size:12px">Na tela de login, use o botão "Continuar com Google".</p>`
+    : `<p>You requested a password reset, but your account signs in with <b>"Continue with Google"</b> — so there's no password to reset.</p>
+       <p style="margin:22px 0">${resetButton("Go to login", loginUrl)}</p>
+       <p style="color:#8a92a4;font-size:12px">On the login screen, use "Continue with Google".</p>`;
+  await deliver({ from, to, subject, html: shell(body), text: `${subject}: ${loginUrl}` });
+}
+
 /**
  * Envia o e-mail da aplicação para a caixa da equipe (MAIL_TO).
  * Lança erro se o Resend não estiver configurado ou se a API falhar —

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
@@ -160,7 +161,7 @@ export function AuthForm() {
               {pending ? t("loggingIn") : t("loginBtn")} <Icon n="arrow-right" />
             </button>
             <p className="legal">
-              <a href="#">{t("forgot")}</a>
+              <Link href="/esqueci-senha">{t("forgot")}</Link>
             </p>
           </form>
         </div>

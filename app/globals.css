@@ -163,6 +163,8 @@ button { font-family: var(--font-body); }
 .auth__point { display: flex; align-items: center; gap: 12px; font-size: 14px; color: rgba(255,255,255,.85); }
 .auth__point i { font-size: 18px; width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); flex-shrink: 0; }
 .auth__form { display: flex; align-items: center; justify-content: center; padding: 40px 28px; }
+/* layout centrado simples (esqueci/redefinir senha) */
+.authsolo { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; background: var(--bg); }
 .authcard { width: 100%; max-width: 396px; }
 .authcard__mark { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 22px; font-family: var(--font-title); font-weight: 800; font-size: 20px; letter-spacing: -.02em; color: var(--brand); }
 .authcard__emblem { width: 36px; height: 36px; overflow: hidden; display: inline-flex; align-items: center; flex-shrink: 0; }

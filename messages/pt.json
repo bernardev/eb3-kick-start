@@ -309,6 +309,25 @@
     "errorText": "Tente novamente em instantes ou veja todas as vagas direto no kick-start.us.",
     "seeJobsSite": "Ver vagas no site"
   },
+  "reset": {
+    "forgotTitle": "Esqueceu sua senha?",
+    "forgotSub": "Informe seu e-mail e enviaremos um link para redefinir a senha.",
+    "emailLabel": "Email",
+    "send": "Enviar link",
+    "sending": "Enviando…",
+    "sentTitle": "Verifique seu e-mail",
+    "sentMsg": "Se existir uma conta com esse e-mail, enviamos um link para redefinir a senha. O link expira em 1 hora.",
+    "backToLogin": "Voltar ao login",
+    "resetTitle": "Criar nova senha",
+    "resetSub": "Defina uma nova senha para a sua conta.",
+    "newPassword": "Nova senha",
+    "save": "Salvar nova senha",
+    "saving": "Salvando…",
+    "successTitle": "Senha redefinida!",
+    "successMsg": "Sua senha foi atualizada. Agora você já pode entrar.",
+    "goLogin": "Ir para o login",
+    "missingToken": "Link inválido ou ausente. Solicite a redefinição novamente."
+  },
   "support": {
     "notReady": "Não está pronto para aplicar?",
     "talkWhatsapp": "Falar no WhatsApp",

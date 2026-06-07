@@ -46,6 +46,20 @@ model User {
   createdAt    DateTime      @default(now())
   applications Application[]
   case         Case?
+  resetTokens  PasswordResetToken[]
+}
+
+// Tokens de redefinição de senha (link enviado por e-mail). Guarda o HASH
+// do token (não o valor original) + validade.
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Eb3Job {
