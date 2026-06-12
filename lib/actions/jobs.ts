@@ -26,6 +26,7 @@ const jobSchema = z.object({
   postedLabel: z.string().trim().optional().default(""),
   description: z.string().trim().min(10, "Descreva a vaga."),
   requirements: z.array(z.string().trim().min(1)),
+  process: z.string().trim().optional().default(""),
   observations: z.string().trim().optional().default(""),
   published: z.boolean(),
   questions: z.array(questionSchema),
@@ -48,8 +49,8 @@ export async function saveJob(input: JobInput): Promise<JobActionResult> {
     title: d.title, employer: d.employer, logo: d.logo || null, location: d.location,
     type: d.type, visa: d.visa, salary: d.salary, openings: d.openings,
     postedLabel: d.postedLabel || null, description: d.description,
-    requirements: d.requirements, observations: d.observations || null,
-    published: d.published,
+    requirements: d.requirements, process: d.process || null,
+    observations: d.observations || null, published: d.published,
   };
 
   if (d.id) {

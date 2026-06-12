@@ -24,6 +24,7 @@ export type JobFormData = {
   postedLabel: string;
   description: string;
   requirements: string[];
+  process: string;
   observations: string;
   published: boolean;
   questions: QuestionDraft[];
@@ -32,7 +33,7 @@ export type JobFormData = {
 const EMPTY: JobFormData = {
   title: "", employer: "", logo: "", location: "", type: "Tempo integral",
   visa: "EB-3 · Unskilled", salary: "", openings: 1, postedLabel: "",
-  description: "", requirements: [], observations: "", published: true, questions: [],
+  description: "", requirements: [], process: "", observations: "", published: true, questions: [],
 };
 
 export function JobForm({ initial }: { initial?: JobFormData }) {
@@ -44,7 +45,8 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
     id: base.id, title: base.title, employer: base.employer, logo: base.logo,
     location: base.location, type: base.type, visa: base.visa, salary: base.salary,
     openings: base.openings, postedLabel: base.postedLabel,
-    description: base.description, observations: base.observations, published: base.published,
+    description: base.description, process: base.process, observations: base.observations,
+    published: base.published,
   });
   const [reqText, setReqText] = useState(base.requirements.join("\n"));
   const [error, setError] = useState<string | null>(null);
@@ -143,12 +145,19 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
           <textarea className="input" style={{ minHeight: 90 }} value={reqText} onChange={(e) => setReqText(e.target.value)} />
         </div>
 
-        <label className="consent" style={{ marginBottom: 16 }}>
-          <input type="checkbox" checked={f.published} onChange={(e) => set("published", e.target.checked)} />
-          <span>{t("publishedLabel")}</span>
-        </label>
+        <div className="field">
+          <label className="field__label">{t("process")}</label>
+          <textarea
+            className="input"
+            style={{ minHeight: 100 }}
+            value={f.process}
+            onChange={(e) => set("process", e.target.value)}
+            placeholder={t("processPlaceholder")}
+          />
+          <div className="field__hint">{t("processHint")}</div>
+        </div>
 
-        <div className="field" style={{ marginBottom: 0 }}>
+        <div className="field">
           <label className="field__label">{t("observations")}</label>
           <textarea
             className="input"
@@ -159,6 +168,11 @@ export function JobForm({ initial }: { initial?: JobFormData }) {
           />
           <div className="field__hint">{t("observationsHint")}</div>
         </div>
+
+        <label className="consent" style={{ marginBottom: 0 }}>
+          <input type="checkbox" checked={f.published} onChange={(e) => set("published", e.target.checked)} />
+          <span>{t("publishedLabel")}</span>
+        </label>
       </div>
 
       <div className="g1note" style={{ marginTop: 4 }}>

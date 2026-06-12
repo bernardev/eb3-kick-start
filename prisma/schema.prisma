@@ -75,6 +75,7 @@ model Eb3Job {
   postedLabel  String? // rótulo livre tipo "2 dias atrás" (opcional)
   description  String // descritivo da vaga (escrito pela equipe)
   requirements String[] // lista de requisitos
+  process      String? // "Como funciona o processo" — seção na página da vaga (abaixo dos requisitos)
   observations String? // observações destacadas (ex.: valor para aplicar) — só na página da vaga
   published    Boolean       @default(true)
   createdAt    DateTime      @default(now())

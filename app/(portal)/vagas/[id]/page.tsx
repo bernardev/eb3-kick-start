@@ -90,6 +90,12 @@ export default async function JobDetailPage({
               ))}
             </ul>
           </div>
+          {job.process && (
+            <div className="jd__section">
+              <h3>{t("processTitle")}</h3>
+              <p style={{ whiteSpace: "pre-wrap" }}>{job.process}</p>
+            </div>
+          )}
           <div className="jd__section">
             <h3>{t("aboutSponsorship")}</h3>
             <p>{t("sponsorshipText")}</p>
