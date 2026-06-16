@@ -104,6 +104,7 @@ export async function submitG1(input: {
   jobId: string;
   data: G1Data;
   consent: boolean;
+  applicationId?: string; // quando presente, edita a aplicação existente
 }): Promise<G1SubmitState> {
   const user = await requireUser();
 
@@ -135,17 +136,56 @@ export async function submitG1(input: {
   const applicantName =
     `${d.personal.firstName} ${d.personal.lastName}`.trim() || dbUser?.name || "—";
 
-  const application = await prisma.application.create({
-    data: {
-      userId: user.id,
-      jobId: job.id,
-      answers: d as unknown as object, // G1 completo em JSON
-      consentAccepted: true,
-      consentText: CONSENT_CHECKBOX,
-      consentAt: now,
-      consentIp: ip,
-    },
-  });
+  let application;
+  if (input.applicationId) {
+    // EDIÇÃO: só é permitida enquanto o caso não foi aberto (status inalterado).
+    const existing = await prisma.application.findUnique({
+      where: { id: input.applicationId },
+      include: { user: { select: { case: { select: { id: true } } } } },
+    });
+    if (!existing || existing.userId !== user.id) {
+      return { error: "Aplicação não encontrada." };
+    }
+    if (existing.user.case) {
+      return { error: "Sua aplicação já está em análise e não pode mais ser editada. Fale com a equipe." };
+    }
+    // Arquiva a versão atual no histórico antes de sobrescrever.
+    await prisma.applicationRevision.create({
+      data: {
+        applicationId: existing.id,
+        answers: existing.answers as object,
+        consentText: existing.consentText,
+        consentAt: existing.consentAt,
+        consentIp: existing.consentIp,
+      },
+    });
+    application = await prisma.application.update({
+      where: { id: existing.id },
+      data: {
+        jobId: job.id,
+        answers: d as unknown as object,
+        consentAccepted: true,
+        consentText: CONSENT_CHECKBOX,
+        consentAt: now,
+        consentIp: ip,
+        emailSentAt: null,
+        emailMessageId: null,
+        emailError: null,
+      },
+    });
+  } else {
+    application = await prisma.application.create({
+      data: {
+        userId: user.id,
+        jobId: job.id,
+        answers: d as unknown as object, // G1 completo em JSON
+        consentAccepted: true,
+        consentText: CONSENT_CHECKBOX,
+        consentAt: now,
+        consentIp: ip,
+      },
+    });
+  }
 
   // Gera PDF + envia e-mail com anexo. Se falhar, a aplicação já está salva.
   // IMPORTANTE: o documento enviado à equipe/empresas é SEMPRE em inglês.
@@ -187,6 +227,7 @@ export async function submitG1(input: {
       summary,
       pdf,
       pdfFilename: `G1-${applicantName.replace(/[^a-zA-Z0-9]+/g, "-")}.pdf`,
+      isEdit: !!input.applicationId,
     });
 
     // Rastreio: aparece nos logs da Vercel e no painel admin.

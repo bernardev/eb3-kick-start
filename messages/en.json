@@ -84,6 +84,7 @@
   "jobDetail": {
     "breadcrumb": "EB-3 Jobs",
     "applyHere": "Apply here",
+    "editApplication": "Edit my application",
     "location": "Location",
     "type": "Type",
     "baseSalary": "Base salary",
@@ -103,7 +104,13 @@
   "apply": {
     "kicker": "EB-3 Application · G1 Form",
     "title": "Apply for {job}",
-    "crumbApply": "Apply"
+    "editTitle": "Edit your application for {job}",
+    "crumbApply": "Apply",
+    "editNoticeTitle": "You are editing an application you already submitted",
+    "editNoticeText": "Your data has been loaded below. Change what you need and click save — this replaces the previous version and resends it to the team. The old version is kept in the history.",
+    "lockedTitle": "Application under review",
+    "lockedText": "Your application is already under review by the team and can no longer be edited here. If you need to correct something, please contact the Kick Start team.",
+    "lockedCta": "View my process"
   },
   "g1": {
     "capsNote": "Please write all contents in CAPITALS. Dates in MM/DD/YYYY format.",
@@ -160,6 +167,7 @@
     "consentTitle": "ATTENTION!",
     "consentCheckbox": "I am aware of and agree with the details and values of the job",
     "submit": "Submit application",
+    "submitEdit": "Save changes",
     "submitting": "Submitting…",
     "cancel": "Cancel",
     "errAgree": "You must accept the Declaration to submit.",
@@ -167,6 +175,8 @@
     "errRequired": "Please fill in the {count} required fields highlighted in red. If something does not apply to you, write \"N/A\".",
     "successTitle": "Application submitted!",
     "successText": "We received your G1 form for {job} ({employer}). The Kick Start team will review it and get in touch. Track it in \"My EB-3 Process\".",
+    "editSuccessTitle": "Application updated!",
+    "editSuccessText": "We updated your G1 form for {job} ({employer}). The new version has been sent to the Kick Start team.",
     "successProcess": "My process",
     "successOtherJobs": "See other jobs"
   },
@@ -257,6 +267,9 @@
     "openCaseShort": "Open case",
     "downloadPdf": "Download full G1 PDF",
     "summary": "Summary",
+    "editedAt": "Edited on {date}",
+    "historyTitle": "Version history ({count})",
+    "versionLabel": "Version {n}",
     "jobsTitle": "EB-3 Jobs",
     "jobsSubtitle": "Create and edit the jobs for each position.",
     "newJob": "New job",

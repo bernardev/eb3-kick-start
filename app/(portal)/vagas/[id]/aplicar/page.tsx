@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
 import { G1Form } from "@/components/G1Form";
 import { SupportCta } from "@/components/SupportCta";
+import type { G1Data } from "@/lib/g1";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,20 @@ export default async function AplicarPage({
   const t = await getTranslations("apply");
   const td = await getTranslations("jobDetail");
 
+  // Aplicação já enviada por este candidato para esta vaga (a mais recente),
+  // e se o caso já foi aberto (status alterado) — o que trava a edição.
+  const existing = await prisma.application.findFirst({
+    where: { userId: user.id, jobId: job.id },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, answers: true },
+  });
+  const userCase = await prisma.case.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+  const locked = !!existing && !!userCase; // já em análise → não pode editar
+  const editing = !!existing && !locked; // pode reabrir e editar
+
   return (
     <div className="container container--wide">
       <div className="crumbs">
@@ -35,7 +50,7 @@ export default async function AplicarPage({
       <div className="pagehead">
         <div>
           <div className="kicker">{t("kicker")}</div>
-          <h1>{t("title", { job: job.title })}</h1>
+          <h1>{editing ? t("editTitle", { job: job.title }) : t("title", { job: job.title })}</h1>
           <p>
             {job.employer} · {job.visa}
           </p>
@@ -46,10 +61,38 @@ export default async function AplicarPage({
         <SupportCta />
       </div>
 
-      <G1Form
-        job={{ id: job.id, title: job.title, employer: job.employer, visa: job.visa }}
-        defaultEmail={user.email ?? undefined}
-      />
+      {locked ? (
+        <div className="notice">
+          <Icon n="lock" />
+          <div>
+            <div className="notice__t">{t("lockedTitle")}</div>
+            <p>{t("lockedText")}</p>
+            <div style={{ marginTop: 12 }}>
+              <Link className="btn btn--ghost btn--sm" href="/meu-processo">
+                <Icon n="route" /> {t("lockedCta")}
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {editing && (
+            <div className="notice" style={{ marginBottom: 18 }}>
+              <Icon n="edit" />
+              <div>
+                <div className="notice__t">{t("editNoticeTitle")}</div>
+                <p>{t("editNoticeText")}</p>
+              </div>
+            </div>
+          )}
+          <G1Form
+            job={{ id: job.id, title: job.title, employer: job.employer, visa: job.visa }}
+            defaultEmail={user.email ?? undefined}
+            initialData={editing ? (existing!.answers as unknown as G1Data) : undefined}
+            applicationId={editing ? existing!.id : undefined}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ export default async function CandidaturasPage() {
     include: {
       job: { select: { title: true, employer: true, visa: true } },
       user: { select: { id: true, name: true, email: true, country: true, case: { select: { id: true } } } },
+      revisions: { orderBy: { createdAt: "desc" }, select: { id: true, answers: true, createdAt: true } },
     },
   });
 
@@ -66,6 +67,11 @@ export default async function CandidaturasPage() {
                     <span>
                       <Icon n="calendar-event" /> {fmtDateTime(app.createdAt)}
                     </span>
+                    {app.revisions.length > 0 && app.updatedAt && (
+                      <span>
+                        <Icon n="edit" /> {t("editedAt", { date: fmtDateTime(app.updatedAt) })}
+                      </span>
+                    )}
                     <span>
                       <Icon n="discount-check" /> {t("consentAccepted")}
                       {app.consentIp ? ` · IP ${app.consentIp}` : ""}
@@ -99,6 +105,22 @@ export default async function CandidaturasPage() {
               <div style={{ marginTop: 14 }}>
                 <AnswersBlock appId={app.id} answers={app.answers} />
               </div>
+
+              {app.revisions.length > 0 && (
+                <details style={{ marginTop: 14 }}>
+                  <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+                    <Icon n="history" /> {t("historyTitle", { count: app.revisions.length })}
+                  </summary>
+                  {app.revisions.map((rev, i) => (
+                    <div className="g1block" key={rev.id} style={{ marginTop: 12 }}>
+                      <div className="kicker" style={{ marginBottom: 8 }}>
+                        {t("versionLabel", { n: app.revisions.length - i })} · {fmtDateTime(rev.createdAt)}
+                      </div>
+                      <AnswersBlock appId={app.id} answers={rev.answers} hidePdf />
+                    </div>
+                  ))}
+                </details>
+              )}
             </div>
           );
         })

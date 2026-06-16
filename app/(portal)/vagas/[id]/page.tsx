@@ -14,7 +14,7 @@ export default async function JobDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
   const t = await getTranslations("jobDetail");
 
@@ -22,6 +22,18 @@ export default async function JobDetailPage({
     where: { id, published: true },
   });
   if (!job) notFound();
+
+  // Já aplicou para esta vaga e o caso ainda não foi aberto? → pode editar.
+  const existingApp = await prisma.application.findFirst({
+    where: { userId: user.id, jobId: job.id },
+    select: { id: true },
+  });
+  const userCase = await prisma.case.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+  const canEdit = !!existingApp && !userCase;
+  const applyLabel = canEdit ? t("editApplication") : t("applyHere");
 
   const logo = job.logo ?? job.employer.slice(0, 2).toUpperCase();
 
@@ -43,7 +55,7 @@ export default async function JobDetailPage({
           </div>
         </div>
         <Link className="btn btn--primary btn--lg" href={`/vagas/${job.id}/aplicar`}>
-          <Icon n="send" /> {t("applyHere")}
+          <Icon n={canEdit ? "edit" : "send"} /> {applyLabel}
         </Link>
       </div>
 
@@ -131,7 +143,7 @@ export default async function JobDetailPage({
               href={`/vagas/${job.id}/aplicar`}
               style={{ marginTop: 16 }}
             >
-              <Icon n="send" /> {t("applyHere")}
+              <Icon n={canEdit ? "edit" : "send"} /> {applyLabel}
             </Link>
           </div>
 

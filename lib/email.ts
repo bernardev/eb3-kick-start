@@ -190,6 +190,7 @@ export type G1EmailData = {
   summary: { label: string; value: string }[]; // resumo de campos-chave
   pdf: Buffer;
   pdfFilename: string;
+  isEdit?: boolean; // reenvio: candidato editou uma aplicação já enviada
 };
 
 // O e-mail para a equipe/empresas é SEMPRE em inglês (ele é encaminhado às
@@ -255,9 +256,9 @@ export async function sendG1Email(d: G1EmailData): Promise<DeliverResult & { to:
     from,
     to,
     replyTo: d.applicantEmail,
-    subject: `New G1 application — ${d.jobTitle} — ${d.applicantName}`,
+    subject: `${d.isEdit ? "Updated G1 application" : "New G1 application"} — ${d.jobTitle} — ${d.applicantName}`,
     html: buildG1Html(d),
-    text: `New G1 application — ${d.jobTitle} — ${d.applicantName}. The complete G1 form is attached as a PDF.`,
+    text: `${d.isEdit ? "Updated G1 application" : "New G1 application"} — ${d.jobTitle} — ${d.applicantName}. The complete G1 form is attached as a PDF.`,
     attachments: [{ filename: d.pdfFilename, content: d.pdf }],
   });
   return { ...result, to };

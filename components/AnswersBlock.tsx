@@ -20,7 +20,7 @@ function Row({ q, a }: { q: string; a: string }) {
 // Renderiza as respostas de uma aplicação. Para o formato G1, mostra um
 // resumo (no idioma atual) + botão para baixar o PDF completo. Mantém
 // compatibilidade com aplicações antigas (lista pergunta/resposta).
-export async function AnswersBlock({ appId, answers }: { appId: string; answers: unknown }) {
+export async function AnswersBlock({ appId, answers, hidePdf }: { appId: string; answers: unknown; hidePdf?: boolean }) {
   const t = await getTranslations("admin");
   const locale = await getLocale();
   const en = locale === "en";
@@ -45,11 +45,13 @@ export async function AnswersBlock({ appId, answers }: { appId: string; answers:
     ];
     return (
       <div>
-        <div style={{ marginBottom: 14 }}>
-          <a className="btn btn--ghost btn--sm" href={`/api/applications/${appId}/pdf`} target="_blank" rel="noopener noreferrer">
-            <Icon n="file-text" /> {t("downloadPdf")}
-          </a>
-        </div>
+        {!hidePdf && (
+          <div style={{ marginBottom: 14 }}>
+            <a className="btn btn--ghost btn--sm" href={`/api/applications/${appId}/pdf`} target="_blank" rel="noopener noreferrer">
+              <Icon n="file-text" /> {t("downloadPdf")}
+            </a>
+          </div>
+        )}
         <div className="kicker" style={{ marginBottom: 8 }}>{t("summary")}</div>
         {summary.map((r, i) => (
           <Row key={i} q={r.q} a={r.a} />

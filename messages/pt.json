@@ -84,6 +84,7 @@
   "jobDetail": {
     "breadcrumb": "Vagas EB-3",
     "applyHere": "Aplique aqui",
+    "editApplication": "Editar minha aplicação",
     "location": "Localização",
     "type": "Tipo",
     "baseSalary": "Salário base",
@@ -103,7 +104,13 @@
   "apply": {
     "kicker": "Aplicação EB-3 · G1 Form",
     "title": "Aplique para {job}",
-    "crumbApply": "Aplicar"
+    "editTitle": "Editar sua aplicação para {job}",
+    "crumbApply": "Aplicar",
+    "editNoticeTitle": "Você está editando uma aplicação já enviada",
+    "editNoticeText": "Seus dados já foram carregados abaixo. Altere o que precisar e clique em salvar — isso substitui a versão anterior e reenvia para a equipe. A versão antiga fica guardada no histórico.",
+    "lockedTitle": "Aplicação em análise",
+    "lockedText": "Sua aplicação já entrou em análise pela equipe e não pode mais ser editada por aqui. Se precisar corrigir algo, fale com a equipe da Kick Start.",
+    "lockedCta": "Ver meu processo"
   },
   "g1": {
     "capsNote": "Please write all contents in CAPITALS · Preencha tudo em MAIÚSCULAS. Datas no formato MM/DD/AAAA.",
@@ -160,6 +167,7 @@
     "consentTitle": "ATENÇÃO!",
     "consentCheckbox": "Estou ciente e de acordo com os detalhes e valores da vaga",
     "submit": "Enviar aplicação",
+    "submitEdit": "Salvar alterações",
     "submitting": "Enviando…",
     "cancel": "Cancelar",
     "errAgree": "É preciso aceitar a Declaração para enviar.",
@@ -167,6 +175,8 @@
     "errRequired": "Preencha os {count} campos obrigatórios destacados em vermelho. Se algo não se aplica a você, escreva \"N/A\".",
     "successTitle": "Aplicação enviada!",
     "successText": "Recebemos seu formulário G1 para {job} ({employer}). A equipe da Kick Start vai analisar e entrar em contato. Acompanhe em \"Meu Processo EB-3\".",
+    "editSuccessTitle": "Aplicação atualizada!",
+    "editSuccessText": "Atualizamos seu formulário G1 para {job} ({employer}). A nova versão já foi enviada para a equipe da Kick Start.",
     "successProcess": "Meu processo",
     "successOtherJobs": "Ver outras vagas"
   },
@@ -257,6 +267,9 @@
     "openCaseShort": "Abrir caso",
     "downloadPdf": "Baixar PDF do G1 completo",
     "summary": "Resumo",
+    "editedAt": "Editado em {date}",
+    "historyTitle": "Histórico de versões ({count})",
+    "versionLabel": "Versão {n}",
     "jobsTitle": "Vagas EB-3",
     "jobsSubtitle": "Cadastre e edite as vagas e os questionários de cada posição.",
     "newJob": "Nova vaga",

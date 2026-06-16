@@ -115,9 +115,26 @@ model Application {
   emailMessageId  String? // ID retornado pelo servidor SMTP (rastreio)
   emailError      String? // mensagem de erro, se o envio falhou
   createdAt       DateTime @default(now())
+  updatedAt       DateTime? @updatedAt // última edição feita pelo candidato
+  revisions       ApplicationRevision[]
 
   @@index([userId])
   @@index([jobId])
+}
+
+// Versões anteriores de uma aplicação, guardadas a cada edição do candidato
+// (histórico — a versão atual fica sempre na própria Application).
+model ApplicationRevision {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  answers       Json // snapshot do G1 da versão substituída
+  consentText   String
+  consentAt     DateTime
+  consentIp     String?
+  createdAt     DateTime    @default(now()) // quando esta versão foi arquivada
+
+  @@index([applicationId])
 }
 
 // O processo EB-3 de um cliente (1 caso por cliente).

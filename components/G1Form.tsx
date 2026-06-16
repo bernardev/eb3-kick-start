@@ -91,13 +91,25 @@ function getIn(obj: unknown, path: (string | number)[]): unknown {
   return cur;
 }
 
-export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: string }) {
+export function G1Form({
+  job,
+  defaultEmail,
+  initialData,
+  applicationId,
+}: {
+  job: JobInfo;
+  defaultEmail?: string;
+  initialData?: G1Data;
+  applicationId?: string;
+}) {
   const t = useTranslations("g1");
   const tc = useTranslations("consent");
   const locale = useLocale();
   const L = useLabel();
+  const isEdit = !!applicationId;
 
   const [data, setData] = useState<G1Data>(() => {
+    if (initialData) return structuredClone(initialData);
     const d = emptyG1();
     if (defaultEmail) d.additional.email = defaultEmail;
     return d;
@@ -205,7 +217,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
     if (!data.declaration.agreed) return setError(t("errAgree"));
     if (!consent) return setError(t("errConsent"));
     startTransition(async () => {
-      const res = await submitG1({ jobId: job.id, data, consent });
+      const res = await submitG1({ jobId: job.id, data, consent, applicationId });
       if (res?.error) setError(res.error);
       else setOk(true);
     });
@@ -217,8 +229,8 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
         <div className="success__badge">
           <Icon n="circle-check" />
         </div>
-        <h1>{t("successTitle")}</h1>
-        <p>{t("successText", { job: job.title, employer: job.employer })}</p>
+        <h1>{isEdit ? t("editSuccessTitle") : t("successTitle")}</h1>
+        <p>{isEdit ? t("editSuccessText", { job: job.title, employer: job.employer }) : t("successText", { job: job.title, employer: job.employer })}</p>
         <div className="welcome__actions" style={{ marginTop: 28 }}>
           <Link className="btn btn--primary btn--lg" href="/meu-processo">
             <Icon n="route" /> {t("successProcess")}
@@ -561,7 +573,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
 
       <div className="formactions">
         <button className="btn btn--primary btn--lg" type="button" onClick={submit} disabled={pending}>
-          <Icon n="send" /> {pending ? t("submitting") : t("submit")}
+          <Icon n="send" /> {pending ? t("submitting") : isEdit ? t("submitEdit") : t("submit")}
         </button>
         <Link className="btn btn--quiet" href={`/vagas/${job.id}`}>
           {t("cancel")}
