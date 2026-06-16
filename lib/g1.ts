@@ -13,6 +13,7 @@ export type FieldMeta = {
   pt: string;
   type?: "text" | "textarea" | "date" | "radio";
   options?: Opt[];
+  req?: boolean; // campo obrigatório (marcado no G1 oficial 2026)
 };
 
 // ---- opções de seleção ----
@@ -158,30 +159,30 @@ export function emptyG1(): G1Data {
 
 // ---- metadados de campos (labels bilíngues) ----
 export const PERSONAL_FIELDS: FieldMeta[] = [
-  { key: "lastName", en: "Last Name", pt: "Sobrenome" },
-  { key: "firstName", en: "First Name", pt: "Nome" },
+  { key: "lastName", en: "Last Name", pt: "Sobrenome", req: true },
+  { key: "firstName", en: "First Name", pt: "Nome", req: true },
   { key: "middleName", en: "Middle Name", pt: "Nome do Meio" },
   { key: "formerName", en: "Former Name (if changed)", pt: "Nome Anterior (se mudou)" },
-  { key: "sex", en: "Sex", pt: "Sexo", type: "radio", options: SEX_OPTIONS },
-  { key: "maritalStatus", en: "Marital Status", pt: "Estado Civil", type: "radio", options: MARITAL_OPTIONS },
+  { key: "sex", en: "Sex", pt: "Sexo", type: "radio", options: SEX_OPTIONS, req: true },
+  { key: "maritalStatus", en: "Marital Status", pt: "Estado Civil", type: "radio", options: MARITAL_OPTIONS, req: true },
 ];
 
 export const ADDRESS_FIELDS: FieldMeta[] = [
-  { key: "street", en: "Street", pt: "Rua" },
-  { key: "city", en: "City", pt: "Cidade" },
-  { key: "state", en: "State / Province", pt: "Estado / Província" },
-  { key: "country", en: "Country", pt: "País" },
-  { key: "postal", en: "Postal Code", pt: "CEP / Código Postal" },
-  { key: "phone", en: "Phone Number", pt: "Número de Telefone" },
-  { key: "dob", en: "Date of Birth (MM/DD/YYYY)", pt: "Data de Nascimento", type: "date" },
-  { key: "citizenship", en: "Country of Citizenship", pt: "País de Cidadania" },
-  { key: "birthCountry", en: "Country of Birth", pt: "País de Nascimento" },
+  { key: "street", en: "Street", pt: "Rua", req: true },
+  { key: "city", en: "City", pt: "Cidade", req: true },
+  { key: "state", en: "State / Province", pt: "Estado / Província", req: true },
+  { key: "country", en: "Country", pt: "País", req: true },
+  { key: "postal", en: "Postal Code", pt: "CEP / Código Postal", req: true },
+  { key: "phone", en: "Phone Number", pt: "Número de Telefone", req: true },
+  { key: "dob", en: "Date of Birth (MM/DD/YYYY)", pt: "Data de Nascimento", type: "date", req: true },
+  { key: "citizenship", en: "Country of Citizenship", pt: "País de Cidadania", req: true },
+  { key: "birthCountry", en: "Country of Birth", pt: "País de Nascimento", req: true },
 ];
 
 export const EMERGENCY_FIELDS: FieldMeta[] = [
-  { key: "name", en: "Name for Emergency", pt: "Nome para Emergência" },
-  { key: "relationship", en: "Relationship", pt: "Parentesco / Relação" },
-  { key: "phone", en: "Telephone for Emergency", pt: "Telefone para Emergência" },
+  { key: "name", en: "Name for Emergency", pt: "Nome para Emergência", req: true },
+  { key: "relationship", en: "Relationship", pt: "Parentesco / Relação", req: true },
+  { key: "phone", en: "Telephone for Emergency", pt: "Telefone para Emergência", req: true },
 ];
 
 export const SOCIAL_FIELDS: FieldMeta[] = [
@@ -194,59 +195,59 @@ export const SOCIAL_FIELDS: FieldMeta[] = [
 ];
 
 export const EDUCATION_FIELDS: FieldMeta[] = [
-  { key: "level", en: "Education (Highest Level)", pt: "Nível de Educação", type: "radio", options: EDUCATION_OPTIONS },
-  { key: "majors", en: "Specific Major Field(s) of Study", pt: "Área(s) de Especialização" },
-  { key: "yearFrom", en: "Education completed — From", pt: "Formação — De" },
-  { key: "yearTo", en: "Education completed — To", pt: "Formação — Até" },
-  { key: "schoolName", en: "School Name", pt: "Nome da Escola / Faculdade" },
-  { key: "schoolAddress", en: "School Address", pt: "Endereço da Escola" },
-  { key: "city", en: "City", pt: "Cidade" },
-  { key: "state", en: "State / Province", pt: "Estado / Província" },
-  { key: "country", en: "Country", pt: "País" },
-  { key: "postal", en: "Postal Code", pt: "CEP / Código Postal" },
-  { key: "graduated", en: "Graduated?", pt: "Se formou?", type: "radio", options: YESNO_OPTIONS },
+  { key: "level", en: "Education (Highest Level)", pt: "Nível de Educação", type: "radio", options: EDUCATION_OPTIONS, req: true },
+  { key: "majors", en: "Specific Major Field(s) of Study", pt: "Área(s) de Especialização", req: true },
+  { key: "yearFrom", en: "Education completed — From", pt: "Formação — De", req: true },
+  { key: "yearTo", en: "Education completed — To", pt: "Formação — Até", req: true },
+  { key: "schoolName", en: "School Name", pt: "Nome da Escola / Faculdade", req: true },
+  { key: "schoolAddress", en: "School Address", pt: "Endereço da Escola", req: true },
+  { key: "city", en: "City", pt: "Cidade", req: true },
+  { key: "state", en: "State / Province", pt: "Estado / Província", req: true },
+  { key: "country", en: "Country", pt: "País", req: true },
+  { key: "postal", en: "Postal Code", pt: "CEP / Código Postal", req: true },
+  { key: "graduated", en: "Graduated?", pt: "Se formou?", type: "radio", options: YESNO_OPTIONS, req: true },
 ];
 
 export const EMPLOYMENT_FIELDS: FieldMeta[] = [
-  { key: "employer", en: "Employer / Company Name", pt: "Nome do Empregador / Empresa" },
-  { key: "address", en: "Address", pt: "Endereço" },
-  { key: "city", en: "City", pt: "Cidade" },
-  { key: "state", en: "State / Province", pt: "Estado / Província" },
-  { key: "country", en: "Country", pt: "País" },
-  { key: "postal", en: "Postal Code", pt: "CEP / Código Postal" },
-  { key: "businessType", en: "Type of Business", pt: "Tipo de Negócio / Setor" },
-  { key: "jobTitle", en: "Job Title", pt: "Cargo / Função" },
-  { key: "startDate", en: "Start Date (MM/DD/YYYY)", pt: "Data de Início", type: "date" },
-  { key: "endDate", en: "End Date (MM/DD/YYYY)", pt: "Data de Término", type: "date" },
-  { key: "hoursPerWeek", en: "Hours Worked per Week", pt: "Horas Trabalhadas por Semana" },
-  { key: "supervisorName", en: "Employer / Supervisor Name", pt: "Nome do Supervisor / Representante" },
-  { key: "supervisorPhone", en: "Phone of Employer / Supervisor", pt: "Telefone do Empregador / Supervisor" },
-  { key: "mayContact", en: "May we contact your employer?", pt: "Podemos contatar seu empregador?", type: "radio", options: YESNO_OPTIONS },
+  { key: "employer", en: "Employer / Company Name", pt: "Nome do Empregador / Empresa", req: true },
+  { key: "address", en: "Address", pt: "Endereço", req: true },
+  { key: "city", en: "City", pt: "Cidade", req: true },
+  { key: "state", en: "State / Province", pt: "Estado / Província", req: true },
+  { key: "country", en: "Country", pt: "País", req: true },
+  { key: "postal", en: "Postal Code", pt: "CEP / Código Postal", req: true },
+  { key: "businessType", en: "Type of Business", pt: "Tipo de Negócio / Setor", req: true },
+  { key: "jobTitle", en: "Job Title", pt: "Cargo / Função", req: true },
+  { key: "startDate", en: "Start Date (MM/DD/YYYY)", pt: "Data de Início", type: "date", req: true },
+  { key: "endDate", en: "End Date (MM/DD/YYYY)", pt: "Data de Término", type: "date", req: true },
+  { key: "hoursPerWeek", en: "Hours Worked per Week", pt: "Horas Trabalhadas por Semana", req: true },
+  { key: "supervisorName", en: "Employer / Supervisor Name", pt: "Nome do Supervisor / Representante", req: true },
+  { key: "supervisorPhone", en: "Phone of Employer / Supervisor", pt: "Telefone do Empregador / Supervisor", req: true },
+  { key: "mayContact", en: "May we contact your employer?", pt: "Podemos contatar seu empregador?", type: "radio", options: YESNO_OPTIONS, req: true },
 ];
 
 export const ADDITIONAL_FIELDS: FieldMeta[] = [
-  { key: "nativeName", en: "Name in Native Language", pt: "Nome no Idioma Nativo" },
-  { key: "email", en: "E-mail (required)", pt: "E-mail (obrigatório)" },
-  { key: "interviewLocation", en: "Preferred Interview Location", pt: "Local Preferencial para Entrevista" },
+  { key: "nativeName", en: "Name in Native Language", pt: "Nome no Idioma Nativo", req: true },
+  { key: "email", en: "E-mail (required)", pt: "E-mail (obrigatório)", req: true },
+  { key: "interviewLocation", en: "Preferred Interview Location", pt: "Local Preferencial para Entrevista", req: true },
 ];
 
 export const FAMILY_COLUMNS: FieldMeta[] = [
-  { key: "nameEnglish", en: "Name in English", pt: "Nome em Inglês" },
+  { key: "nameEnglish", en: "Name in English", pt: "Nome em Inglês", req: true },
   { key: "placeOfBirth", en: "Place of Birth (City & Country)", pt: "Local de Nascimento" },
   { key: "email", en: "Email", pt: "E-mail" },
   { key: "dob", en: "Date of Birth (MM/DD/YYYY)", pt: "Data de Nascimento", type: "date" },
 ];
 
 export const SPOUSE_FIELDS: FieldMeta[] = [
-  { key: "profession", en: "Profession", pt: "Profissão" },
-  { key: "education", en: "Education (Highest Level)", pt: "Nível de Educação", type: "radio", options: EDUCATION_OPTIONS },
-  { key: "currentEmployer", en: "Current Employer", pt: "Empregador Atual" },
-  { key: "city", en: "City of Employment", pt: "Cidade de Trabalho" },
-  { key: "country", en: "Country of Employment", pt: "País de Trabalho" },
-  { key: "businessType", en: "Type of Business", pt: "Tipo de Negócio" },
-  { key: "jobTitle", en: "Job Title", pt: "Cargo / Função" },
-  { key: "startDate", en: "Start Date (MM/DD/YYYY)", pt: "Data de Início", type: "date" },
-  { key: "endDate", en: "End Date (MM/DD/YYYY)", pt: "Data de Término", type: "date" },
+  { key: "profession", en: "Profession", pt: "Profissão", req: true },
+  { key: "education", en: "Education (Highest Level)", pt: "Nível de Educação", type: "radio", options: EDUCATION_OPTIONS, req: true },
+  { key: "currentEmployer", en: "Current Employer", pt: "Empregador Atual", req: true },
+  { key: "city", en: "City of Employment", pt: "Cidade de Trabalho", req: true },
+  { key: "country", en: "Country of Employment", pt: "País de Trabalho", req: true },
+  { key: "businessType", en: "Type of Business", pt: "Tipo de Negócio", req: true },
+  { key: "jobTitle", en: "Job Title", pt: "Cargo / Função", req: true },
+  { key: "startDate", en: "Start Date (MM/DD/YYYY)", pt: "Data de Início", type: "date", req: true },
+  { key: "endDate", en: "End Date (MM/DD/YYYY)", pt: "Data de Término", type: "date", req: true },
 ];
 
 export const SSN_COLUMNS: FieldMeta[] = [

@@ -164,6 +164,7 @@
     "cancel": "Cancelar",
     "errAgree": "É preciso aceitar a Declaração para enviar.",
     "errConsent": "É necessário marcar o consentimento para enviar a aplicação.",
+    "errRequired": "Preencha os {count} campos obrigatórios destacados em vermelho. Se algo não se aplica a você, escreva \"N/A\".",
     "successTitle": "Aplicação enviada!",
     "successText": "Recebemos seu formulário G1 para {job} ({employer}). A equipe da Kick Start vai analisar e entrar em contato. Acompanhe em \"Meu Processo EB-3\".",
     "successProcess": "Meu processo",

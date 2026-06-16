@@ -190,6 +190,12 @@ button { font-family: var(--font-body); }
 .input::placeholder { color: var(--ink-4); }
 .input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 .input--icon { padding-left: 42px; }
+/* campos obrigatórios / validação */
+.req-star { color: var(--st-denied); font-weight: 700; }
+.field.is-invalid .field__label { color: var(--st-denied); }
+.input.is-invalid, .field.is-invalid .input { border-color: var(--st-denied); background: var(--st-denied-bg); }
+.input.is-invalid:focus { border-color: var(--st-denied); box-shadow: 0 0 0 3px var(--st-denied-bd); }
+.field.is-invalid .g1radio { padding: 4px; border: 1px dashed var(--st-denied); border-radius: var(--r-sm); }
 .inputwrap { position: relative; }
 .inputwrap > i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-4); font-size: 18px; }
 .legal { font-size: 12px; color: var(--ink-3); margin-top: 18px; line-height: 1.55; text-align: center; }

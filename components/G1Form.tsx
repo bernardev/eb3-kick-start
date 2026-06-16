@@ -21,12 +21,17 @@ function useLabel() {
   return (f: { en: string; pt: string }) => (locale === "en" ? f.en : f.pt);
 }
 
-function FieldView({ meta, value, onChange }: { meta: FieldMeta; value: string; onChange: (v: string) => void }) {
+// Asterisco vermelho para campos obrigatórios.
+function Req() {
+  return <span className="req-star" aria-hidden="true"> *</span>;
+}
+
+function FieldView({ meta, value, onChange, invalid }: { meta: FieldMeta; value: string; onChange: (v: string) => void; invalid?: boolean }) {
   const L = useLabel();
   if (meta.type === "radio" && meta.options) {
     return (
-      <div className="field" style={{ gridColumn: "1 / -1" }}>
-        <label className="field__label">{L(meta)}</label>
+      <div className={"field" + (invalid ? " is-invalid" : "")} style={{ gridColumn: "1 / -1" }}>
+        <label className="field__label">{L(meta)}{meta.req && <Req />}</label>
         <div className="g1radio">
           {meta.options.map((o) => (
             <label key={o.value} className={"g1opt" + (value === o.value ? " is-on" : "")}>
@@ -40,25 +45,25 @@ function FieldView({ meta, value, onChange }: { meta: FieldMeta; value: string; 
   }
   if (meta.type === "textarea") {
     return (
-      <div className="field" style={{ gridColumn: "1 / -1" }}>
-        <label className="field__label">{L(meta)}</label>
-        <textarea className="input" style={{ minHeight: 90 }} value={value} onChange={(e) => onChange(e.target.value)} />
+      <div className={"field" + (invalid ? " is-invalid" : "")} style={{ gridColumn: "1 / -1" }}>
+        <label className="field__label">{L(meta)}{meta.req && <Req />}</label>
+        <textarea className={"input" + (invalid ? " is-invalid" : "")} style={{ minHeight: 90 }} value={value} onChange={(e) => onChange(e.target.value)} />
       </div>
     );
   }
   return (
-    <div className="field">
-      <label className="field__label">{L(meta)}</label>
-      <input className="input" value={value} onChange={(e) => onChange(e.target.value)} />
+    <div className={"field" + (invalid ? " is-invalid" : "")}>
+      <label className="field__label">{L(meta)}{meta.req && <Req />}</label>
+      <input className={"input" + (invalid ? " is-invalid" : "")} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }
 
-function YesNo({ question, value, onChange }: { question: string; value: string; onChange: (v: string) => void }) {
+function YesNo({ question, value, onChange, req, invalid }: { question: string; value: string; onChange: (v: string) => void; req?: boolean; invalid?: boolean }) {
   const L = useLabel();
   return (
-    <div className="field" style={{ gridColumn: "1 / -1" }}>
-      <label className="field__label">{question}</label>
+    <div className={"field" + (invalid ? " is-invalid" : "")} style={{ gridColumn: "1 / -1" }}>
+      <label className="field__label">{question}{req && <Req />}</label>
       <div className="g1radio">
         {YESNO_OPTIONS.map((o) => (
           <label key={o.value} className={"g1opt" + (value === o.value ? " is-on" : "")}>
@@ -100,9 +105,21 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
+  const [missing, setMissing] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
 
-  const set = (path: (string | number)[], value: unknown) =>
+  // chave única de um campo (caminho) e teste de "obrigatório em branco".
+  const km = (path: (string | number)[]) => path.join(".");
+  const inv = (path: (string | number)[]) => missing.has(km(path));
+
+  const set = (path: (string | number)[], value: unknown) => {
+    // ao editar, remove a marcação de erro daquele campo.
+    setMissing((prev) => {
+      if (!prev.has(km(path))) return prev;
+      const next = new Set(prev);
+      next.delete(km(path));
+      return next;
+    });
     setData((prev) => {
       const next = structuredClone(prev);
       let cur: Record<string, unknown> = next as unknown as Record<string, unknown>;
@@ -110,6 +127,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       cur[path[path.length - 1] as string] = value;
       return next;
     });
+  };
   const mutArr = (path: (string | number)[], fn: (arr: unknown[]) => void) =>
     setData((prev) => {
       const next = structuredClone(prev);
@@ -117,8 +135,73 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       return next;
     });
 
+  // valor "em branco" (string vazia/espacos ou ausente).
+  const empty = (v: unknown) => v == null || (typeof v === "string" && v.trim() === "");
+
+  // Lista os caminhos dos campos obrigatórios ainda em branco.
+  const collectMissing = (d: G1Data): string[] => {
+    const miss: string[] = [];
+    const check = (base: (string | number)[], fields: FieldMeta[], obj: Record<string, string>) => {
+      for (const f of fields) if (f.req && empty(obj[f.key])) miss.push(km([...base, f.key]));
+    };
+    const rec = (o: unknown) => o as unknown as Record<string, string>;
+
+    check(["personal"], PERSONAL_FIELDS, rec(d.personal));
+    check(["address"], ADDRESS_FIELDS, rec(d.address));
+    check(["emergency"], EMERGENCY_FIELDS, rec(d.emergency));
+    check(["education"], EDUCATION_FIELDS, rec(d.education));
+
+    check(["currentEmployment"], EMPLOYMENT_FIELDS, rec(d.currentEmployment));
+    if (empty(d.currentEmployment.jobDetails)) miss.push("currentEmployment.jobDetails");
+
+    check(["previousEmployments", 0], EMPLOYMENT_FIELDS, rec(d.previousEmployments[0]));
+    if (empty(d.previousEmployments[0]?.jobDetails)) miss.push("previousEmployments.0.jobDetails");
+
+    check(["additional"], ADDITIONAL_FIELDS, rec(d.additional));
+
+    // Família: nome de cada linha (cônjuge + filhos) — "N/A" se não houver.
+    d.family.forEach((m, i) => { if (empty(m.nameEnglish)) miss.push(km(["family", i, "nameEnglish"])); });
+
+    check(["spouse"], SPOUSE_FIELDS, rec(d.spouse));
+    if (empty(d.spouse.jobDetails)) miss.push("spouse.jobDetails");
+
+    if (empty(d.usEntry.everInUs)) miss.push("usEntry.everInUs");
+
+    if (empty(d.visaCompliance.currentStatus)) miss.push("visaCompliance.currentStatus");
+    if (empty(d.visaCompliance.violatedTerms)) miss.push("visaCompliance.violatedTerms");
+    else if (d.visaCompliance.violatedTerms === "YES" && empty(d.visaCompliance.violatedDetails)) miss.push("visaCompliance.violatedDetails");
+    if (empty(d.visaCompliance.arrested)) miss.push("visaCompliance.arrested");
+    else if (d.visaCompliance.arrested === "YES" && empty(d.visaCompliance.arrestedDetails)) miss.push("visaCompliance.arrestedDetails");
+    if (empty(d.visaCompliance.stayedOver6m)) miss.push("visaCompliance.stayedOver6m");
+    else if (d.visaCompliance.stayedOver6m === "YES" && empty(d.visaCompliance.stayedDetails)) miss.push("visaCompliance.stayedDetails");
+
+    if (empty(d.greenCard.history)) miss.push("greenCard.history");
+
+    (["criminalRecord", "violations", "tb", "hepatitis", "hiv", "otherConditions"] as const).forEach((k) => {
+      if (empty(d.medical[k])) miss.push(km(["medical", k]));
+    });
+    if (d.medical.violations === "YES" && empty(d.medical.violationsDetails)) miss.push("medical.violationsDetails");
+    if (d.medical.otherConditions === "YES" && empty(d.medical.otherDetails)) miss.push("medical.otherDetails");
+
+    IMPORTANT_QUESTIONS.forEach((q) => { if (empty(d.importantQuestions[q.key])) miss.push(km(["importantQuestions", q.key])); });
+
+    if (empty(d.declaration.signature)) miss.push("declaration.signature");
+    return miss;
+  };
+
   const submit = () => {
     setError(null);
+    const miss = collectMissing(data);
+    if (miss.length > 0) {
+      setMissing(new Set(miss));
+      setError(t("errRequired", { count: miss.length }));
+      // rola até o primeiro campo destacado depois do re-render.
+      setTimeout(() => {
+        document.querySelector(".field.is-invalid, .input.is-invalid")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 60);
+      return;
+    }
+    setMissing(new Set());
     if (!data.declaration.agreed) return setError(t("errAgree"));
     if (!consent) return setError(t("errConsent"));
     startTransition(async () => {
@@ -153,16 +236,16 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       <FieldView key={f.key} meta={f} value={root[f.key as keyof SocialMedia]} onChange={(v) => set([...base, f.key], v)} />
     ));
 
-  const employmentBlock = (emp: Employment, base: (string | number)[]) => (
+  const employmentBlock = (emp: Employment, base: (string | number)[], reqDetails = false) => (
     <>
       <div className="formgrid">
         {EMPLOYMENT_FIELDS.map((f) => (
-          <FieldView key={f.key} meta={f} value={emp[f.key as keyof Employment] as string} onChange={(v) => set([...base, f.key], v)} />
+          <FieldView key={f.key} meta={f} value={emp[f.key as keyof Employment] as string} onChange={(v) => set([...base, f.key], v)} invalid={inv([...base, f.key])} />
         ))}
       </div>
-      <div className="field" style={{ marginTop: 12 }}>
-        <label className="field__label">{t("jobDetails")}</label>
-        <textarea className="input" style={{ minHeight: 110 }} value={emp.jobDetails} onChange={(e) => set([...base, "jobDetails"], e.target.value)} />
+      <div className={"field" + (inv([...base, "jobDetails"]) ? " is-invalid" : "")} style={{ marginTop: 12 }}>
+        <label className="field__label">{t("jobDetails")}{reqDetails && <Req />}</label>
+        <textarea className={"input" + (inv([...base, "jobDetails"]) ? " is-invalid" : "")} style={{ minHeight: 110 }} value={emp.jobDetails} onChange={(e) => set([...base, "jobDetails"], e.target.value)} />
       </div>
     </>
   );
@@ -180,7 +263,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       <SectionCard title={t("sec_personal")}>
         <div className="formgrid">
           {PERSONAL_FIELDS.map((f) => (
-            <FieldView key={f.key} meta={f} value={(data.personal as Record<string, string>)[f.key]} onChange={(v) => set(["personal", f.key], v)} />
+            <FieldView key={f.key} meta={f} value={(data.personal as Record<string, string>)[f.key]} onChange={(v) => set(["personal", f.key], v)} invalid={inv(["personal", f.key])} />
           ))}
         </div>
         {data.personal.sex === "OTHER" && (
@@ -198,7 +281,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       <SectionCard title={t("sec_address")}>
         <div className="formgrid">
           {ADDRESS_FIELDS.map((f) => (
-            <FieldView key={f.key} meta={f} value={(data.address as Record<string, string>)[f.key]} onChange={(v) => set(["address", f.key], v)} />
+            <FieldView key={f.key} meta={f} value={(data.address as Record<string, string>)[f.key]} onChange={(v) => set(["address", f.key], v)} invalid={inv(["address", f.key])} />
           ))}
         </div>
       </SectionCard>
@@ -206,7 +289,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       <SectionCard title={t("sec_emergency")}>
         <div className="formgrid">
           {EMERGENCY_FIELDS.map((f) => (
-            <FieldView key={f.key} meta={f} value={(data.emergency as Record<string, string>)[f.key]} onChange={(v) => set(["emergency", f.key], v)} />
+            <FieldView key={f.key} meta={f} value={(data.emergency as Record<string, string>)[f.key]} onChange={(v) => set(["emergency", f.key], v)} invalid={inv(["emergency", f.key])} />
           ))}
         </div>
       </SectionCard>
@@ -218,13 +301,13 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       <SectionCard title={t("sec_education")}>
         <div className="formgrid">
           {EDUCATION_FIELDS.map((f) => (
-            <FieldView key={f.key} meta={f} value={(data.education as Record<string, string>)[f.key]} onChange={(v) => set(["education", f.key], v)} />
+            <FieldView key={f.key} meta={f} value={(data.education as Record<string, string>)[f.key]} onChange={(v) => set(["education", f.key], v)} invalid={inv(["education", f.key])} />
           ))}
         </div>
       </SectionCard>
 
       <SectionCard title={t("sec_currentEmp")}>
-        {employmentBlock(data.currentEmployment, ["currentEmployment"])}
+        {employmentBlock(data.currentEmployment, ["currentEmployment"], true)}
       </SectionCard>
 
       <SectionCard title={t("sec_prevEmp")}>
@@ -238,7 +321,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
                 </button>
               )}
             </div>
-            {employmentBlock(emp, ["previousEmployments", i])}
+            {employmentBlock(emp, ["previousEmployments", i], i === 0)}
           </div>
         ))}
         <button type="button" className="btn btn--ghost btn--sm" onClick={() => mutArr(["previousEmployments"], (a) => a.push(emptyEmployment()))}>
@@ -249,7 +332,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       <SectionCard title={t("sec_addPersonal")}>
         <div className="formgrid">
           {ADDITIONAL_FIELDS.map((f) => (
-            <FieldView key={f.key} meta={f} value={(data.additional as Record<string, string>)[f.key]} onChange={(v) => set(["additional", f.key], v)} />
+            <FieldView key={f.key} meta={f} value={(data.additional as Record<string, string>)[f.key]} onChange={(v) => set(["additional", f.key], v)} invalid={inv(["additional", f.key])} />
           ))}
         </div>
       </SectionCard>
@@ -260,7 +343,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
             <div className="g1block__title" style={{ marginBottom: 12 }}>{m.relationship}</div>
             <div className="formgrid">
               {FAMILY_COLUMNS.map((f) => (
-                <FieldView key={f.key} meta={f} value={(m as unknown as Record<string, string>)[f.key]} onChange={(v) => set(["family", i, f.key], v)} />
+                <FieldView key={f.key} meta={f} value={(m as unknown as Record<string, string>)[f.key]} onChange={(v) => set(["family", i, f.key], v)} invalid={inv(["family", i, f.key])} />
               ))}
             </div>
           </div>
@@ -274,19 +357,19 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       <SectionCard title={t("sec_spouse")}>
         <div className="formgrid">
           {SPOUSE_FIELDS.map((f) => (
-            <FieldView key={f.key} meta={f} value={(data.spouse as unknown as Record<string, string>)[f.key]} onChange={(v) => set(["spouse", f.key], v)} />
+            <FieldView key={f.key} meta={f} value={(data.spouse as unknown as Record<string, string>)[f.key]} onChange={(v) => set(["spouse", f.key], v)} invalid={inv(["spouse", f.key])} />
           ))}
         </div>
-        <div className="field" style={{ marginTop: 12 }}>
-          <label className="field__label">{t("spouseJobDetails")}</label>
-          <textarea className="input" style={{ minHeight: 90 }} value={data.spouse.jobDetails} onChange={(e) => set(["spouse", "jobDetails"], e.target.value)} />
+        <div className={"field" + (inv(["spouse", "jobDetails"]) ? " is-invalid" : "")} style={{ marginTop: 12 }}>
+          <label className="field__label">{t("spouseJobDetails")}<Req /></label>
+          <textarea className={"input" + (inv(["spouse", "jobDetails"]) ? " is-invalid" : "")} style={{ minHeight: 90 }} value={data.spouse.jobDetails} onChange={(e) => set(["spouse", "jobDetails"], e.target.value)} />
         </div>
         <div className="g1block__title" style={{ margin: "14px 0 10px" }}>{t("spouseSocial")}</div>
         <div className="formgrid">{social(data.spouse.social, ["spouse", "social"])}</div>
       </SectionCard>
 
       <SectionCard title={t("sec_usEntry")}>
-        <YesNo question={t("everInUs")} value={data.usEntry.everInUs} onChange={(v) => set(["usEntry", "everInUs"], v)} />
+        <YesNo question={t("everInUs")} value={data.usEntry.everInUs} onChange={(v) => set(["usEntry", "everInUs"], v)} req invalid={inv(["usEntry", "everInUs"])} />
         {data.usEntry.people.map((p, pi) => (
           <div className="g1block" key={pi}>
             <div className="g1block__title" style={{ marginBottom: 12 }}>{p.name}</div>
@@ -316,30 +399,30 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
 
       <SectionCard title={t("sec_visa")}>
         <div className="formgrid">
-          <div className="field" style={{ gridColumn: "1 / -1" }}>
-            <label className="field__label">{t("currentVisaStatus")}</label>
-            <input className="input" value={data.visaCompliance.currentStatus} onChange={(e) => set(["visaCompliance", "currentStatus"], e.target.value)} />
+          <div className={"field" + (inv(["visaCompliance", "currentStatus"]) ? " is-invalid" : "")} style={{ gridColumn: "1 / -1" }}>
+            <label className="field__label">{t("currentVisaStatus")}<Req /></label>
+            <input className={"input" + (inv(["visaCompliance", "currentStatus"]) ? " is-invalid" : "")} value={data.visaCompliance.currentStatus} onChange={(e) => set(["visaCompliance", "currentStatus"], e.target.value)} />
           </div>
         </div>
-        <YesNo question={t("violatedTerms")} value={data.visaCompliance.violatedTerms} onChange={(v) => set(["visaCompliance", "violatedTerms"], v)} />
+        <YesNo question={t("violatedTerms")} value={data.visaCompliance.violatedTerms} onChange={(v) => set(["visaCompliance", "violatedTerms"], v)} req invalid={inv(["visaCompliance", "violatedTerms"])} />
         {data.visaCompliance.violatedTerms === "YES" && (
-          <div className="field" style={{ marginBottom: 12 }}>
-            <label className="field__label">{t("ifYesExplain")}</label>
-            <textarea className="input" style={{ minHeight: 80 }} value={data.visaCompliance.violatedDetails} onChange={(e) => set(["visaCompliance", "violatedDetails"], e.target.value)} />
+          <div className={"field" + (inv(["visaCompliance", "violatedDetails"]) ? " is-invalid" : "")} style={{ marginBottom: 12 }}>
+            <label className="field__label">{t("ifYesExplain")}<Req /></label>
+            <textarea className={"input" + (inv(["visaCompliance", "violatedDetails"]) ? " is-invalid" : "")} style={{ minHeight: 80 }} value={data.visaCompliance.violatedDetails} onChange={(e) => set(["visaCompliance", "violatedDetails"], e.target.value)} />
           </div>
         )}
-        <YesNo question={t("arrested")} value={data.visaCompliance.arrested} onChange={(v) => set(["visaCompliance", "arrested"], v)} />
+        <YesNo question={t("arrested")} value={data.visaCompliance.arrested} onChange={(v) => set(["visaCompliance", "arrested"], v)} req invalid={inv(["visaCompliance", "arrested"])} />
         {data.visaCompliance.arrested === "YES" && (
-          <div className="field" style={{ marginBottom: 12 }}>
-            <label className="field__label">{t("ifYesExplain")}</label>
-            <textarea className="input" style={{ minHeight: 80 }} value={data.visaCompliance.arrestedDetails} onChange={(e) => set(["visaCompliance", "arrestedDetails"], e.target.value)} />
+          <div className={"field" + (inv(["visaCompliance", "arrestedDetails"]) ? " is-invalid" : "")} style={{ marginBottom: 12 }}>
+            <label className="field__label">{t("ifYesExplain")}<Req /></label>
+            <textarea className={"input" + (inv(["visaCompliance", "arrestedDetails"]) ? " is-invalid" : "")} style={{ minHeight: 80 }} value={data.visaCompliance.arrestedDetails} onChange={(e) => set(["visaCompliance", "arrestedDetails"], e.target.value)} />
           </div>
         )}
-        <YesNo question={t("stayedOver6m")} value={data.visaCompliance.stayedOver6m} onChange={(v) => set(["visaCompliance", "stayedOver6m"], v)} />
+        <YesNo question={t("stayedOver6m")} value={data.visaCompliance.stayedOver6m} onChange={(v) => set(["visaCompliance", "stayedOver6m"], v)} req invalid={inv(["visaCompliance", "stayedOver6m"])} />
         {data.visaCompliance.stayedOver6m === "YES" && (
-          <div className="field">
-            <label className="field__label">{t("ifYesExplain")}</label>
-            <textarea className="input" style={{ minHeight: 80 }} value={data.visaCompliance.stayedDetails} onChange={(e) => set(["visaCompliance", "stayedDetails"], e.target.value)} />
+          <div className={"field" + (inv(["visaCompliance", "stayedDetails"]) ? " is-invalid" : "")}>
+            <label className="field__label">{t("ifYesExplain")}<Req /></label>
+            <textarea className={"input" + (inv(["visaCompliance", "stayedDetails"]) ? " is-invalid" : "")} style={{ minHeight: 80 }} value={data.visaCompliance.stayedDetails} onChange={(e) => set(["visaCompliance", "stayedDetails"], e.target.value)} />
           </div>
         )}
       </SectionCard>
@@ -366,21 +449,21 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       </SectionCard>
 
       <SectionCard title={t("sec_greenCard")}>
-        <div className="field">
-          <label className="field__label">{t("gcHistory")}</label>
-          <textarea className="input" style={{ minHeight: 90 }} value={data.greenCard.history} onChange={(e) => set(["greenCard", "history"], e.target.value)} />
+        <div className={"field" + (inv(["greenCard", "history"]) ? " is-invalid" : "")}>
+          <label className="field__label">{t("gcHistory")}<Req /></label>
+          <textarea className={"input" + (inv(["greenCard", "history"]) ? " is-invalid" : "")} style={{ minHeight: 90 }} value={data.greenCard.history} onChange={(e) => set(["greenCard", "history"], e.target.value)} />
         </div>
         <YesNo question={t("childrenMedicare")} value={data.greenCard.childrenMedicare} onChange={(v) => set(["greenCard", "childrenMedicare"], v)} />
       </SectionCard>
 
       <SectionCard title={t("sec_medical")}>
-        <YesNo question={t("criminalRecord")} value={data.medical.criminalRecord} onChange={(v) => set(["medical", "criminalRecord"], v)} />
-        <YesNo question={t("violations")} value={data.medical.violations} onChange={(v) => set(["medical", "violations"], v)} />
+        <YesNo question={t("criminalRecord")} value={data.medical.criminalRecord} onChange={(v) => set(["medical", "criminalRecord"], v)} req invalid={inv(["medical", "criminalRecord"])} />
+        <YesNo question={t("violations")} value={data.medical.violations} onChange={(v) => set(["medical", "violations"], v)} req invalid={inv(["medical", "violations"])} />
         {data.medical.violations === "YES" && (
           <div className="formgrid" style={{ marginBottom: 12 }}>
-            <div className="field" style={{ gridColumn: "1 / -1" }}>
-              <label className="field__label">{t("details")}</label>
-              <textarea className="input" style={{ minHeight: 70 }} value={data.medical.violationsDetails} onChange={(e) => set(["medical", "violationsDetails"], e.target.value)} />
+            <div className={"field" + (inv(["medical", "violationsDetails"]) ? " is-invalid" : "")} style={{ gridColumn: "1 / -1" }}>
+              <label className="field__label">{t("details")}<Req /></label>
+              <textarea className={"input" + (inv(["medical", "violationsDetails"]) ? " is-invalid" : "")} style={{ minHeight: 70 }} value={data.medical.violationsDetails} onChange={(e) => set(["medical", "violationsDetails"], e.target.value)} />
             </div>
             <div className="field">
               <label className="field__label">{t("impairedCount")}</label>
@@ -388,12 +471,12 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
             </div>
           </div>
         )}
-        <YesNo question={t("tb")} value={data.medical.tb} onChange={(v) => set(["medical", "tb"], v)} />
-        <YesNo question={t("hepatitis")} value={data.medical.hepatitis} onChange={(v) => set(["medical", "hepatitis"], v)} />
-        <YesNo question={t("hiv")} value={data.medical.hiv} onChange={(v) => set(["medical", "hiv"], v)} />
-        <YesNo question={t("otherConditions")} value={data.medical.otherConditions} onChange={(v) => set(["medical", "otherConditions"], v)} />
+        <YesNo question={t("tb")} value={data.medical.tb} onChange={(v) => set(["medical", "tb"], v)} req invalid={inv(["medical", "tb"])} />
+        <YesNo question={t("hepatitis")} value={data.medical.hepatitis} onChange={(v) => set(["medical", "hepatitis"], v)} req invalid={inv(["medical", "hepatitis"])} />
+        <YesNo question={t("hiv")} value={data.medical.hiv} onChange={(v) => set(["medical", "hiv"], v)} req invalid={inv(["medical", "hiv"])} />
+        <YesNo question={t("otherConditions")} value={data.medical.otherConditions} onChange={(v) => set(["medical", "otherConditions"], v)} req invalid={inv(["medical", "otherConditions"])} />
         {data.medical.otherConditions === "YES" && (
-          <textarea className="input" style={{ minHeight: 70 }} placeholder={t("details")} value={data.medical.otherDetails} onChange={(e) => set(["medical", "otherDetails"], e.target.value)} />
+          <textarea className={"input" + (inv(["medical", "otherDetails"]) ? " is-invalid" : "")} style={{ minHeight: 70 }} placeholder={t("details")} value={data.medical.otherDetails} onChange={(e) => set(["medical", "otherDetails"], e.target.value)} />
         )}
       </SectionCard>
 
@@ -427,6 +510,8 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
             question={iq(q)}
             value={data.importantQuestions[q.key]}
             onChange={(v) => set(["importantQuestions", q.key], v)}
+            req
+            invalid={inv(["importantQuestions", q.key])}
           />
         ))}
       </SectionCard>
@@ -444,9 +529,9 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
           <span>{t("declAgree")}</span>
         </label>
         <div className="formgrid" style={{ marginTop: 12 }}>
-          <div className="field">
-            <label className="field__label">{t("signature")}</label>
-            <input className="input" value={data.declaration.signature} onChange={(e) => set(["declaration", "signature"], e.target.value)} />
+          <div className={"field" + (inv(["declaration", "signature"]) ? " is-invalid" : "")}>
+            <label className="field__label">{t("signature")}<Req /></label>
+            <input className={"input" + (inv(["declaration", "signature"]) ? " is-invalid" : "")} value={data.declaration.signature} onChange={(e) => set(["declaration", "signature"], e.target.value)} />
           </div>
           <div className="field">
             <label className="field__label">{t("date")}</label>
@@ -475,7 +560,7 @@ export function G1Form({ job, defaultEmail }: { job: JobInfo; defaultEmail?: str
       )}
 
       <div className="formactions">
-        <button className="btn btn--primary btn--lg" type="button" onClick={submit} disabled={pending || !consent || !data.declaration.agreed}>
+        <button className="btn btn--primary btn--lg" type="button" onClick={submit} disabled={pending}>
           <Icon n="send" /> {pending ? t("submitting") : t("submit")}
         </button>
         <Link className="btn btn--quiet" href={`/vagas/${job.id}`}>

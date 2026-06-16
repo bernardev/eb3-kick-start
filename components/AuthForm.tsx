@@ -5,12 +5,10 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
-import { GoogleG } from "./GoogleG";
 import { LocaleToggle } from "./LocaleToggle";
 import { PasswordStrength } from "./PasswordStrength";
 import { passwordChecks } from "@/lib/util";
 import {
-  googleSignIn,
   loginWithCredentials,
   registerUser,
   type AuthFormState,
@@ -80,13 +78,6 @@ export function AuthForm() {
               {t("tabLogin")}
             </button>
           </div>
-
-          <form action={googleSignIn}>
-            <button className="gbtn" type="submit">
-              <GoogleG /> {t("google")}
-            </button>
-          </form>
-          <div className="divider">{t("orEmail")}</div>
 
           {state.error && (
             <div className="formmsg formmsg--error">

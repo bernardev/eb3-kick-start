@@ -164,6 +164,7 @@
     "cancel": "Cancel",
     "errAgree": "You must accept the Declaration to submit.",
     "errConsent": "You must check the consent to submit the application.",
+    "errRequired": "Please fill in the {count} required fields highlighted in red. If something does not apply to you, write \"N/A\".",
     "successTitle": "Application submitted!",
     "successText": "We received your G1 form for {job} ({employer}). The Kick Start team will review it and get in touch. Track it in \"My EB-3 Process\".",
     "successProcess": "My process",
