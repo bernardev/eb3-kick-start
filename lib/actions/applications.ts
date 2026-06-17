@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/guards";
 import { sendApplicationEmail, sendG1Email } from "@/lib/email";
 import { CONSENT_CHECKBOX } from "@/lib/consent";
 import { renderG1Pdf } from "@/lib/g1-pdf";
+import { caseStatusChanged } from "@/lib/case-lock";
 import { MARITAL_OPTIONS, EDUCATION_OPTIONS, type G1Data } from "@/lib/g1";
 
 export type ApplyState = { ok?: boolean; error?: string };
@@ -141,12 +142,11 @@ export async function submitG1(input: {
     // EDIÇÃO: só é permitida enquanto o caso não foi aberto (status inalterado).
     const existing = await prisma.application.findUnique({
       where: { id: input.applicationId },
-      include: { user: { select: { case: { select: { id: true } } } } },
     });
     if (!existing || existing.userId !== user.id) {
       return { error: "Aplicação não encontrada." };
     }
-    if (existing.user.case) {
+    if (await caseStatusChanged(user.id)) {
       return { error: "Sua aplicação já está em análise e não pode mais ser editada. Fale com a equipe." };
     }
     // Arquiva a versão atual no histórico antes de sobrescrever.

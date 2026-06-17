@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
 import { SupportCta } from "@/components/SupportCta";
+import { caseStatusChanged } from "@/lib/case-lock";
 
 export const dynamic = "force-dynamic";
 
@@ -23,16 +24,12 @@ export default async function JobDetailPage({
   });
   if (!job) notFound();
 
-  // Já aplicou para esta vaga e o caso ainda não foi aberto? → pode editar.
+  // Já aplicou para esta vaga e o status ainda não foi alterado? → pode editar.
   const existingApp = await prisma.application.findFirst({
     where: { userId: user.id, jobId: job.id },
     select: { id: true },
   });
-  const userCase = await prisma.case.findUnique({
-    where: { userId: user.id },
-    select: { id: true },
-  });
-  const canEdit = !!existingApp && !userCase;
+  const canEdit = !!existingApp && !(await caseStatusChanged(user.id));
   const applyLabel = canEdit ? t("editApplication") : t("applyHere");
 
   const logo = job.logo ?? job.employer.slice(0, 2).toUpperCase();

@@ -7,6 +7,7 @@ import { Icon } from "@/components/Icon";
 import { G1Form } from "@/components/G1Form";
 import { SupportCta } from "@/components/SupportCta";
 import type { G1Data } from "@/lib/g1";
+import { caseStatusChanged } from "@/lib/case-lock";
 
 export const dynamic = "force-dynamic";
 
@@ -32,11 +33,8 @@ export default async function AplicarPage({
     orderBy: { createdAt: "desc" },
     select: { id: true, answers: true },
   });
-  const userCase = await prisma.case.findUnique({
-    where: { userId: user.id },
-    select: { id: true },
-  });
-  const locked = !!existing && !!userCase; // já em análise → não pode editar
+  const statusChanged = await caseStatusChanged(user.id);
+  const locked = !!existing && statusChanged; // status já alterado → não edita
   const editing = !!existing && !locked; // pode reabrir e editar
 
   return (
