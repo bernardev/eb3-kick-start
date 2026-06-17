@@ -1,8 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/guards";
+import { requireUser, requireAdmin } from "@/lib/guards";
 import { sendApplicationEmail, sendG1Email } from "@/lib/email";
 import { CONSENT_CHECKBOX } from "@/lib/consent";
 import { renderG1Pdf } from "@/lib/g1-pdf";
@@ -146,7 +147,7 @@ export async function submitG1(input: {
     if (!existing || existing.userId !== user.id) {
       return { error: "Aplicação não encontrada." };
     }
-    if (await caseStatusChanged(user.id)) {
+    if ((await caseStatusChanged(user.id)) && !existing.editUnlocked) {
       return { error: "Sua aplicação já está em análise e não pode mais ser editada. Fale com a equipe." };
     }
     // Arquiva a versão atual no histórico antes de sobrescrever.
@@ -248,4 +249,16 @@ export async function submitG1(input: {
   }
 
   return { ok: true };
+}
+
+// Admin: libera (ou volta a bloquear) a edição de uma aplicação específica,
+// mesmo que o status do processo já tenha sido alterado. Usado para exceções
+// (ex.: candidato precisa corrigir dados após o caso já ter andado).
+export async function setApplicationEditUnlock(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("applicationId") ?? "");
+  const unlock = String(formData.get("unlock") ?? "") === "1";
+  if (!id) return;
+  await prisma.application.update({ where: { id }, data: { editUnlocked: unlock } });
+  revalidatePath("/admin/candidaturas");
 }

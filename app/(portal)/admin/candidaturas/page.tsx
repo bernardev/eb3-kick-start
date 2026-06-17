@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/guards";
 import { Icon } from "@/components/Icon";
 import { AnswersBlock } from "@/components/AnswersBlock";
 import { createCase } from "@/lib/actions/cases";
+import { setApplicationEditUnlock } from "@/lib/actions/applications";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +73,11 @@ export default async function CandidaturasPage() {
                         <Icon n="edit" /> {t("editedAt", { date: fmtDateTime(app.updatedAt) })}
                       </span>
                     )}
+                    {app.editUnlocked && (
+                      <span>
+                        <Icon n="lock-open" /> {t("editUnlockedChip")}
+                      </span>
+                    )}
                     <span>
                       <Icon n="discount-check" /> {t("consentAccepted")}
                       {app.consentIp ? ` · IP ${app.consentIp}` : ""}
@@ -86,20 +92,30 @@ export default async function CandidaturasPage() {
                     </span>
                   </div>
                 </div>
-                {hasCase ? (
-                  <Link className="btn btn--ghost btn--sm" href={`/admin/casos/${app.user.case!.id}`}>
-                    <Icon n="arrow-right" /> {t("seeCase")}
-                  </Link>
-                ) : (
-                  <form action={createCase}>
-                    <input type="hidden" name="userId" value={app.user.id} />
-                    <input type="hidden" name="jobLabel" value={`${app.job.title} · ${app.job.employer}`} />
-                    <input type="hidden" name="country" value={app.user.country ?? ""} />
-                    <button className="btn btn--primary btn--sm" type="submit">
-                      <Icon n="plus" /> {t("openCaseShort")}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <form action={setApplicationEditUnlock}>
+                    <input type="hidden" name="applicationId" value={app.id} />
+                    <input type="hidden" name="unlock" value={app.editUnlocked ? "0" : "1"} />
+                    <button className="btn btn--ghost btn--sm" type="submit">
+                      <Icon n={app.editUnlocked ? "lock" : "lock-open"} />{" "}
+                      {app.editUnlocked ? t("relockEdit") : t("unlockEdit")}
                     </button>
                   </form>
-                )}
+                  {hasCase ? (
+                    <Link className="btn btn--ghost btn--sm" href={`/admin/casos/${app.user.case!.id}`}>
+                      <Icon n="arrow-right" /> {t("seeCase")}
+                    </Link>
+                  ) : (
+                    <form action={createCase}>
+                      <input type="hidden" name="userId" value={app.user.id} />
+                      <input type="hidden" name="jobLabel" value={`${app.job.title} · ${app.job.employer}`} />
+                      <input type="hidden" name="country" value={app.user.country ?? ""} />
+                      <button className="btn btn--primary btn--sm" type="submit">
+                        <Icon n="plus" /> {t("openCaseShort")}
+                      </button>
+                    </form>
+                  )}
+                </div>
               </div>
 
               <div style={{ marginTop: 14 }}>

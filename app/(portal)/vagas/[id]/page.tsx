@@ -27,9 +27,10 @@ export default async function JobDetailPage({
   // Já aplicou para esta vaga e o status ainda não foi alterado? → pode editar.
   const existingApp = await prisma.application.findFirst({
     where: { userId: user.id, jobId: job.id },
-    select: { id: true },
+    select: { id: true, editUnlocked: true },
   });
-  const canEdit = !!existingApp && !(await caseStatusChanged(user.id));
+  // Pode editar enquanto o status não foi alterado OU a equipe liberou a edição.
+  const canEdit = !!existingApp && (!(await caseStatusChanged(user.id)) || existingApp.editUnlocked);
   const applyLabel = canEdit ? t("editApplication") : t("applyHere");
 
   const logo = job.logo ?? job.employer.slice(0, 2).toUpperCase();

@@ -114,6 +114,7 @@ model Application {
   emailSentAt     DateTime? // quando o e-mail para info@kick-start.us foi enviado/aceito
   emailMessageId  String? // ID retornado pelo servidor SMTP (rastreio)
   emailError      String? // mensagem de erro, se o envio falhou
+  editUnlocked    Boolean  @default(false) // liberação manual da equipe p/ editar mesmo após status alterado
   createdAt       DateTime @default(now())
   updatedAt       DateTime? @updatedAt // última edição feita pelo candidato
   revisions       ApplicationRevision[]

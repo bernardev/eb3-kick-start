@@ -31,10 +31,11 @@ export default async function AplicarPage({
   const existing = await prisma.application.findFirst({
     where: { userId: user.id, jobId: job.id },
     orderBy: { createdAt: "desc" },
-    select: { id: true, answers: true },
+    select: { id: true, answers: true, editUnlocked: true },
   });
   const statusChanged = await caseStatusChanged(user.id);
-  const locked = !!existing && statusChanged; // status já alterado → não edita
+  // Travado quando o status já mudou, salvo se a equipe liberou esta aplicação.
+  const locked = !!existing && statusChanged && !existing.editUnlocked;
   const editing = !!existing && !locked; // pode reabrir e editar
 
   return (
