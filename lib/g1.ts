@@ -287,7 +287,7 @@ export const DECLARATION_CLAUSES: { en: string; pt: string }[] = [
   { en: "I clearly understand that my children may be subject to an age-out issue if they reach 21 while the application is being processed.", pt: "Estou ciente de que meus filhos podem estar sujeitos ao 'age-out' caso completem 21 anos durante o processo." },
   { en: "I certify that all the information given above is true and correct. False or misleading information may result in refusal of my immigration application.", pt: "Certifico que todas as informações são verdadeiras e corretas. Informações falsas ou enganosas podem resultar na recusa do pedido." },
   { en: "I understand that employment with this company is 'at will'.", pt: "Entendo que o emprego nesta empresa é 'at will' (vontade livre)." },
-  { en: "I hereby authorize Global Express Recruiting (GER) to conduct any background checks it deems necessary, in the U.S. and internationally.", pt: "Autorizo a Global Express Recruiting (GER) a realizar verificações de antecedentes que considere necessárias, nos EUA e internacionalmente." },
+  { en: "I hereby authorize Kick Start to conduct any background checks it deems necessary, in the U.S. and internationally.", pt: "Autorizo a Kick Start a realizar verificações de antecedentes que considere necessárias, nos EUA e internacionalmente." },
 ];
 
 // Rótulo bilíngue compacto ("EN / PT") para usar em labels.
